@@ -4,7 +4,7 @@ public class LeftHandGapFillerMapThing {
 	private Map map;
 	private Map mapCopy; //for markers
 	
-	private String direction = "N";
+	private Direction direction = Direction.NORTH;
 	
 	int steps = 0;
 	private int x;//x is horizontal
@@ -37,37 +37,37 @@ public class LeftHandGapFillerMapThing {
 	        return;
 	    }
 	    //right hand
-	    if(direction.equals("N")){
+	    if(direction.equals(Direction.NORTH)){
 	        if(!mapCopy.getMapTile(x,y).wallNorth&&!mapCopy.getMapTile(x,y+1).filled&&mapCopy.getMapTile(x,y+1).isWalkable){
 	            y++;
 	            searchExit();
 	        }else{
-	            direction = "E";
+	            direction = Direction.EAST;
 	            searchExit();
 	        }
-	    }else if(direction.equals("S")){
+	    }else if(direction.equals(Direction.SOUTH)){
 	        if(!mapCopy.getMapTile(x,y).wallSouth&&!mapCopy.getMapTile(x,y-1).filled&&mapCopy.getMapTile(x,y-1).isWalkable){
 	            y--;
 	            searchExit();
 	        }else{
-	            direction = "W";
+	            direction = Direction.WEST;
 	            searchExit();
 	        }
-	    }else if(direction.equals("E")){
+	    }else if(direction.equals(Direction.EAST)){
 	        if(!mapCopy.getMapTile(x,y).wallEast&&!mapCopy.getMapTile(x-1,y).filled&&mapCopy.getMapTile(x-1,y).isWalkable){
 	            x--;
 	            searchExit();
 	        }else{
-	            direction = "S";
+	            direction = Direction.SOUTH;
 	            searchExit();
 	            //fals drehen kein step hier step--
 	        }
-	    }else if(direction.equals("W")) {
+	    }else if(direction.equals(Direction.WEST)) {
 	        if (!mapCopy.getMapTile(x,y).wallWest&&!mapCopy.getMapTile(x+1,y).filled&&mapCopy.getMapTile(x+1,y).isWalkable) {
 	            x++;
 	            searchExit();
 	        } else {
-	            direction = "N";
+	            direction = Direction.NORTH;
 	            searchExit();
 	        }
 	    }else{
