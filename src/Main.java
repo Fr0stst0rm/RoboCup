@@ -16,7 +16,7 @@ public class Main {
 
 	public Main() throws InterruptedException {
 
-		LCD.drawString("V 0.14", 0, 0);
+		LCD.drawString("V 0.16", 0, 0);
 		Button.waitForAnyPress();
 
 		//		LCD.drawString("Scann path", 0, 0);
@@ -48,7 +48,10 @@ public class Main {
 //
 //		BotUtility.rotateSensor90DegreesRight();
 
-		BotUtility.rotate90DegreesLeft();
+		//BotUtility.rotate90DegreesLeft();
+		
+		ChasmChecker cc = new ChasmChecker();
+		cc.start();
 
 		// Wand erkennen Funktioniert 
 		//		Motor.A.setSpeed(100); // Speed richtig einstellen
@@ -92,7 +95,7 @@ public class Main {
 		//		Thread.sleep(1000);
 		//		Motor.B.rotate(rot);
 
-		//Button.waitForAnyPress();
+		Button.waitForAnyPress();
 
 	}
 
