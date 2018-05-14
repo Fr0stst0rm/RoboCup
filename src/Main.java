@@ -1,17 +1,7 @@
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
-import lejos.nxt.LightSensor;
-import lejos.nxt.Motor;
-import lejos.nxt.SensorPort;
-import lejos.nxt.SensorPortListener;
-import lejos.nxt.UltrasonicSensor;
-import lejos.robotics.objectdetection.Feature;
-import lejos.robotics.objectdetection.FeatureDetector;
-import lejos.robotics.objectdetection.RangeFeatureDetector;
 
-public class Main implements SensorPortListener {
-
-	Direction currentDir = Direction.NORTH;
+public class Main {
 
 	public static void main(String[] args) {
 		try {
@@ -24,9 +14,7 @@ public class Main implements SensorPortListener {
 
 	public Main() throws InterruptedException {
 
-		SensorPort.S1.addSensorPortListener(this);
-
-		LCD.drawString("V 0.5", 0, 0);
+		LCD.drawString("V 0.16", 0, 0);
 		Button.waitForAnyPress();
 
 		//		LCD.drawString("Scann path", 0, 0);
@@ -50,35 +38,52 @@ public class Main implements SensorPortListener {
 			Thread.sleep(1000);
 		}
 
-		Motor.A.forward();
-		Motor.C.forward();
+//		BotUtility.rotateSensor90DegreesRight();
+//
+//		BotUtility.rotateSensor90DegreesLeft();
+//
+//		BotUtility.rotateSensor90DegreesLeft();
+//
+//		BotUtility.rotateSensor90DegreesRight();
 
-		int MAX_DISTANCE = 50; // In centimeters
-		int PERIOD = 100; // In milliseconds
-		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
-		FeatureDetector fd = new RangeFeatureDetector(us, MAX_DISTANCE, PERIOD);
-		Feature result = null;
+		//BotUtility.rotate90DegreesLeft();
+		
+		ChasmChecker cc = new ChasmChecker();
+		cc.start();
 
-		boolean stop = false;
-		while (!stop) {
-			try {
-				result = fd.scan();
-				LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
-				if (result.getRangeReading().getRange() < 15) {
-					stop = true;
-				}
-			} catch (NullPointerException e) {
-				//stop = true;
-			}
-		}
-		if (result != null) {
-			LCD.clear();
-			LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
-		}
-		LCD.drawString("Stop!", 0, 1);
-
-		Motor.A.stop();
-		Motor.C.stop();
+		// Wand erkennen Funktioniert 
+		//		Motor.A.setSpeed(100); // Speed richtig einstellen
+		//		Motor.A.setSpeed(100);
+		//		
+		//		Motor.A.forward();
+		//		Motor.C.forward();
+		//
+		//		int MAX_DISTANCE = 50; // In centimeters
+		//		int PERIOD = 100; // In milliseconds
+		//		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
+		//		FeatureDetector fd = new RangeFeatureDetector(us, MAX_DISTANCE, PERIOD);
+		//		Feature result = null;
+		//
+		//		boolean stop = false;
+		//		while (!stop) {
+		//			try {
+		//				result = fd.scan();
+		//				LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
+		//				if (result.getRangeReading().getRange() < 17) {
+		//					stop = true;
+		//				}
+		//			} catch (NullPointerException e) {
+		//				//stop = true;
+		//			}
+		//		}
+		//		if (result != null) {
+		//			LCD.clear();
+		//			LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
+		//		}
+		//		LCD.drawString("Stop!", 0, 1);
+		//
+		//		Motor.A.stop();
+		//		Motor.C.stop();
 
 		//		Motor.B.setSpeed(100);
 		//		int rot = 650; // Degree
@@ -89,14 +94,6 @@ public class Main implements SensorPortListener {
 		//		Motor.B.rotate(rot);
 
 		Button.waitForAnyPress();
-
-	}
-
-	@Override
-	public void stateChanged(SensorPort aSource, int aOldValue, int aNewValue) {
-		if (aSource.getClass().equals(LightSensor.class)) {
-
-		}
 
 	}
 
