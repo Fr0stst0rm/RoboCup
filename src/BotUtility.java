@@ -59,7 +59,7 @@ public class BotUtility {
 		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
 		FeatureDetector fd = new RangeFeatureDetector(us, MAX_DISTANCE, PERIOD);
 		Feature result = null;
-
+		
 		//Gerade		
 		try {
 			result = fd.scan();
@@ -84,7 +84,60 @@ public class BotUtility {
 			}
 		}
 
-		return null;
+		//Rechts
+		rotate90DegreesRight();
+		try {
+			result = fd.scan();
+			LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
+			if (result.getRangeReading().getRange() < 17) {
+				tile.wallNorth = true;
+			}
+		} catch (NullPointerException e) {
+			switch (BotStatus.currentDir) {
+			case NORTH:
+				tile.wallEast = true;
+				break;
+			case EAST:
+				tile.wallSouth = true;
+				break;
+			case WEST:
+				tile.wallNorth = true;
+				break;
+			case SOUTH:
+				tile.wallWest = true;
+				break;
+			}
+		}
+
+		//Links	
+		rotate90DegreesLeft();
+		rotate90DegreesLeft();
+		try {
+			result = fd.scan();
+			LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
+			if (result.getRangeReading().getRange() < 17) {
+				tile.wallNorth = true;
+			}
+		} catch (NullPointerException e) {
+			switch (BotStatus.currentDir) {
+			case NORTH:
+				tile.wallWest = true;
+				break;
+			case EAST:
+				tile.wallNorth = true;
+				break;
+			case WEST:
+				tile.wallSouth = true;
+				break;
+			case SOUTH:
+				tile.wallEast = true;
+				break;
+			}
+		}
+		
+		rotate90DegreesRight();
+
+		return tile;
 	}
 
 	//TODO SensorObserver
