@@ -8,6 +8,8 @@ public class MapTile {
 	
 	public boolean isWalkable = true;
 	
+	public boolean hasVictim = false;
+	
 	public boolean filled = false;
 
 }
