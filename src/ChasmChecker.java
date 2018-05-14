@@ -16,7 +16,7 @@ public class ChasmChecker implements Runnable{
 	        LCD.drawInt(light.getLightValue(), 4, 0, 0);
 	        LCD.drawInt(light.getNormalizedLightValue(), 4, 0, 1);
 	        LCD.drawInt(SensorPort.S2.readRawValue(), 4, 0, 2);
-	        LCD.drawInt(SensorPort.S2.readValue(), 4, 0, 3);
+	        LCD.drawInt(SensorPort.S2.readValue(), 4, 0, 3);  
 	        temptest++;
 	        if(temptest>100) {
 	        	stop = true;
