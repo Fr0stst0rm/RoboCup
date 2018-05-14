@@ -3,8 +3,6 @@ import lejos.nxt.LCD;
 
 public class Main {
 
-	Direction currentDir = Direction.NORTH;
-
 	public static void main(String[] args) {
 		try {
 			new Main();
@@ -71,7 +69,7 @@ public class Main {
 		//			try {
 		//				result = fd.scan();
 		//				LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
-		//				if (result.getRangeReading().getRange() < 15) {
+		//				if (result.getRangeReading().getRange() < 17) {
 		//					stop = true;
 		//				}
 		//			} catch (NullPointerException e) {

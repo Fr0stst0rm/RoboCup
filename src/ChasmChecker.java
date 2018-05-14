@@ -1,5 +1,3 @@
-import javax.xml.stream.events.StartDocument;
-
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.SensorPort;
