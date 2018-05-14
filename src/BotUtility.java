@@ -2,45 +2,46 @@ import lejos.nxt.Motor;
 
 public class BotUtility {
 	
-	void rotateSensor90DegreesRight() throws InterruptedException {
-		Motor.B.setSpeed(100);
+	public static void rotateSensor90DegreesRight() throws InterruptedException {
+		Motor.B.setSpeed(200);
 		int rot = 650; // Degree
 		Motor.B.rotate(rot);
 	}
 	
-	void rotateSensor90DegreesLeft() throws InterruptedException {
-		Motor.B.setSpeed(100);
-		int rot = -650; // Degree
+	public static void rotateSensor90DegreesLeft() throws InterruptedException {
+		Motor.B.setSpeed(200);
+		int rot = -652; // Degree
 		Motor.B.rotate(rot);
 	}
 	
-	void driveToNextTile() {
+	public static void driveToNextTile() {
 		//TODO
 	}
 	
-	void handleChasm() {
+	public static void handleChasm() {
 		//TODO
 	}
 	
-	void handleVictim() {
+	public static void handleVictim() {
 		//TODO
 	}
 	
-	void scanForWalls() {
+	public static void scanForWalls() {
 		//TODO
 	}
 	
-	void rotate90DegreesLeft() {
-		Motor.A.setSpeed(100);
-		int rotA = -650; // Degree
-		Motor.A.rotate(rotA);
-		Motor.C.setSpeed(100);
-		int rotC = 650; // Degree
-		Motor.C.rotate(rotC);
+	public static void rotate90DegreesLeft() {
+		Motor.A.setSpeed(120);
+		Motor.C.setSpeed(150);
+		int rot = 500; // Degree
+		Motor.A.rotate(-rot,true);
+		Motor.C.rotate(rot);
+		Motor.A.stop();
+		Motor.C.stop();
 		//TODO
 	}
 	
-	void rotate90DegreesRight() {
+	public static void rotate90DegreesRight() {
 		//TODO
 	}
 	
