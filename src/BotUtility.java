@@ -4,13 +4,13 @@ public class BotUtility {
 	
 	public static void rotateSensor90DegreesRight() throws InterruptedException {
 		Motor.B.setSpeed(200);
-		int rot = 650; // Degree
+		int rot = 655; // Degree
 		Motor.B.rotate(rot);
 	}
 	
 	public static void rotateSensor90DegreesLeft() throws InterruptedException {
 		Motor.B.setSpeed(200);
-		int rot = -652; // Degree
+		int rot = -655; // Degree
 		Motor.B.rotate(rot);
 	}
 	
@@ -31,10 +31,10 @@ public class BotUtility {
 	}
 	
 	public static void rotate90DegreesLeft() {
-		Motor.A.setSpeed(120);
+		Motor.A.setSpeed(150);
 		Motor.C.setSpeed(150);
 		int rot = 500; // Degree
-		Motor.A.rotate(-rot,true);
+		Motor.A.rotate(-(rot-25),true);
 		Motor.C.rotate(rot);
 		Motor.A.stop();
 		Motor.C.stop();

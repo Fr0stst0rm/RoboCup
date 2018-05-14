@@ -1,15 +1,7 @@
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
-import lejos.nxt.LightSensor;
-import lejos.nxt.Motor;
-import lejos.nxt.SensorPort;
-import lejos.nxt.SensorPortListener;
-import lejos.nxt.UltrasonicSensor;
-import lejos.robotics.objectdetection.Feature;
-import lejos.robotics.objectdetection.FeatureDetector;
-import lejos.robotics.objectdetection.RangeFeatureDetector;
 
-public class Main implements SensorPortListener {
+public class Main {
 
 	Direction currentDir = Direction.NORTH;
 
@@ -24,9 +16,7 @@ public class Main implements SensorPortListener {
 
 	public Main() throws InterruptedException {
 
-		SensorPort.S1.addSensorPortListener(this);
-
-		LCD.drawString("V 0.9", 0, 0);
+		LCD.drawString("V 0.14", 0, 0);
 		Button.waitForAnyPress();
 
 		//		LCD.drawString("Scann path", 0, 0);
@@ -50,13 +40,13 @@ public class Main implements SensorPortListener {
 			Thread.sleep(1000);
 		}
 
-		BotUtility.rotateSensor90DegreesRight();
-
-		BotUtility.rotateSensor90DegreesLeft();
-		
-		BotUtility.rotateSensor90DegreesLeft();
-		
-		BotUtility.rotateSensor90DegreesRight();
+//		BotUtility.rotateSensor90DegreesRight();
+//
+//		BotUtility.rotateSensor90DegreesLeft();
+//
+//		BotUtility.rotateSensor90DegreesLeft();
+//
+//		BotUtility.rotateSensor90DegreesRight();
 
 		BotUtility.rotate90DegreesLeft();
 
@@ -103,14 +93,6 @@ public class Main implements SensorPortListener {
 		//		Motor.B.rotate(rot);
 
 		//Button.waitForAnyPress();
-
-	}
-
-	@Override
-	public void stateChanged(SensorPort aSource, int aOldValue, int aNewValue) {
-		if (aSource.getClass().equals(LightSensor.class)) {
-
-		}
 
 	}
 
