@@ -1,5 +1,5 @@
 
-public class LeftHandGapFillerMapThing {
+public class RightHandGapFillerMapThing {
 	
 	private Map map;
 	private Map mapCopy; //for markers
@@ -10,7 +10,7 @@ public class LeftHandGapFillerMapThing {
 	private int x;//x is horizontal
 	private int y;//y is vertical
 	
-	public LeftHandGapFillerMapThing(Map map, int startX, int startY) {
+	public RightHandGapFillerMapThing(Map map, int startX, int startY) {
 		this.map = map;
 		this.mapCopy = map;
 		this.y = startY;
@@ -40,24 +40,30 @@ public class LeftHandGapFillerMapThing {
 	    if(direction.equals(Direction.NORTH)){
 	        if(!mapCopy.getMapTile(x,y).wallNorth&&!mapCopy.getMapTile(x,y+1).filled){
 	            y++;
+	            BotUtility.moveToNextTile();
 	            searchExit();
 	        }else{
+	        	BotUtility.rotate90DegreesRight();
 	            direction = Direction.EAST;
 	            searchExit();
 	        }
 	    }else if(direction.equals(Direction.SOUTH)){
 	        if(!mapCopy.getMapTile(x,y).wallSouth&&!mapCopy.getMapTile(x,y-1).filled){
 	            y--;
+	            BotUtility.moveToNextTile();
 	            searchExit();
 	        }else{
+	        	BotUtility.rotate90DegreesRight();
 	            direction = Direction.WEST;
 	            searchExit();
 	        }
 	    }else if(direction.equals(Direction.EAST)){
 	        if(!mapCopy.getMapTile(x,y).wallEast&&!mapCopy.getMapTile(x-1,y).filled){
 	            x--;
+	            BotUtility.moveToNextTile();
 	            searchExit();
 	        }else{
+	        	BotUtility.rotate90DegreesRight();
 	            direction = Direction.SOUTH;
 	            searchExit();
 	            //fals drehen kein step hier step--
@@ -65,8 +71,10 @@ public class LeftHandGapFillerMapThing {
 	    }else if(direction.equals(Direction.WEST)) {
 	        if (!mapCopy.getMapTile(x,y).wallWest&&!mapCopy.getMapTile(x+1,y).filled) {
 	            x++;
+	            BotUtility.moveToNextTile();
 	            searchExit();
 	        } else {
+	        	BotUtility.rotate90DegreesRight();
 	            direction = Direction.NORTH;
 	            searchExit();
 	        }
