@@ -30,6 +30,8 @@ public class BotUtility {
 	}
 
 	public static void handleChasm(LightSensor lightsensor) {
+		Motor.A.stop();
+		Motor.C.stop();
     	LCD.drawString("Chasm detected!", 0, 1);
     	while(lightsensor.getLightValue()<=37) {
     		move(-0.1f);
