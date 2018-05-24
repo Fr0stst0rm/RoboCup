@@ -1,4 +1,4 @@
-import lejos.nxt.Button;
+﻿import lejos.nxt.Button;
 import lejos.nxt.LCD;
 
 public class Main {
@@ -6,15 +6,14 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			new Main();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			LCD.drawString(e.toString(), 0, 0);
 		}
 	}
 
-	public Main() throws InterruptedException {
+	public Main() {
 
-		LCD.drawString("V 0.17", 0, 0);
+		LCD.drawString("V 0.29", 0, 0);
 		Button.waitForAnyPress();
 
 		//		LCD.drawString("Scann path", 0, 0);
@@ -31,68 +30,38 @@ public class Main {
 		//		LCD.drawString("Press button to\nstart ...", 0, 0);
 		//		Button.waitForAnyPress();
 
-		for (int i = 1; i <= 3; i++) {
+		for (int i = 3; i >= 1; i--) {
 			LCD.clear();
 			LCD.drawString("" + i, 0, 0);
 
-			Thread.sleep(1000);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
-//		BotUtility.rotateSensor90DegreesRight();
-//
-//		BotUtility.rotateSensor90DegreesLeft();
-//
-//		BotUtility.rotateSensor90DegreesLeft();
-//
-//		BotUtility.rotateSensor90DegreesRight();
+		while (BotStatus.victimsFound < BotStatus.victimsToFind) {
+			LCD.clear();
+			LCD.drawString("Vics found: "+ BotStatus.victimsFound, 0, 0);
+			
+			BotUtility.moveToNextTile();
+			BotUtility.scanWalls();
 
-		//BotUtility.rotate90DegreesLeft();
+			//		BotUtility.rotate90DegreesLeft();
+			//		BotUtility.rotate90DegreesRight();
+			//		BotUtility.rotate90DegreesRight();
+			//		BotUtility.rotate90DegreesLeft();
+
+			//TODO if entfernung gegenüber ungleich ==> Bot in der mitte plazieren
+			BotStatus.victimsFound++;
+
+		}
 		
-		ChasmChecker cc = new ChasmChecker();
-		cc.start();
-
-		// Wand erkennen Funktioniert 
-		//		Motor.A.setSpeed(100); // Speed richtig einstellen
-		//		Motor.A.setSpeed(100);
-		//		
-		//		Motor.A.forward();
-		//		Motor.C.forward();
-		//
-		//		int MAX_DISTANCE = 50; // In centimeters
-		//		int PERIOD = 100; // In milliseconds
-		//		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
-		//		FeatureDetector fd = new RangeFeatureDetector(us, MAX_DISTANCE, PERIOD);
-		//		Feature result = null;
-		//
-		//		boolean stop = false;
-		//		while (!stop) {
-		//			try {
-		//				result = fd.scan();
-		//				LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
-		//				if (result.getRangeReading().getRange() < 17) {
-		//					stop = true;
-		//				}
-		//			} catch (NullPointerException e) {
-		//				//stop = true;
-		//			}
-		//		}
-		//		if (result != null) {
-		//			LCD.clear();
-		//			LCD.drawString("Range: " + result.getRangeReading().getRange(), 0, 0);
-		//		}
-		//		LCD.drawString("Stop!", 0, 1);
-		//
-		//		Motor.A.stop();
-		//		Motor.C.stop();
-
-		//		Motor.B.setSpeed(100);
-		//		int rot = 650; // Degree
-		//		Motor.B.rotate(rot);
-		//		Thread.sleep(1000);
-		//		Motor.B.rotate(-2 * rot);
-		//		Thread.sleep(1000);
-		//		Motor.B.rotate(rot);
-
+		LCD.drawString("Vics found: "+ BotStatus.victimsFound, 0, 0);
+		LCD.drawString("Stopping!", 0, 4);
+		
 		Button.waitForAnyPress();
 
 	}
