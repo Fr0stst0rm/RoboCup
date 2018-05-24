@@ -1,4 +1,12 @@
-﻿import lejos.nxt.Button;
+﻿import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import lejos.nxt.Button;
 import lejos.nxt.LCD;
 
 public class Main {
@@ -44,10 +52,12 @@ public class Main {
 
 		while (BotStatus.victimsFound < BotStatus.victimsToFind) {
 			LCD.clear();
-			LCD.drawString("Vics found: "+ BotStatus.victimsFound, 0, 0);
-			
+			LCD.drawString("Vics found: " + BotStatus.victimsFound, 0, 0);
+
 			BotUtility.moveToNextTile();
-			BotUtility.scanWalls();
+			MapTile tile = BotUtility.scanWalls();
+			
+			BotStatus.mazeMap.addTile(BotStatus.currentPos.x, BotStatus.currentPos.y, tile);
 
 			//		BotUtility.rotate90DegreesLeft();
 			//		BotUtility.rotate90DegreesRight();
@@ -58,12 +68,37 @@ public class Main {
 			BotStatus.victimsFound++;
 
 		}
-		
-		LCD.drawString("Vics found: "+ BotStatus.victimsFound, 0, 0);
+
+		LCD.drawString("Vics found: " + BotStatus.victimsFound, 0, 0);
 		LCD.drawString("Stopping!", 0, 4);
-		
+
 		Button.waitForAnyPress();
 
+	}
+
+	public void printMapToFile() {
+		File mapOut = new File("map.txt");
+
+		try {
+
+			if (mapOut.exists()) {
+				mapOut.delete();
+			}
+
+			mapOut.createNewFile();
+
+			BufferedWriter bfw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(mapOut)));
+
+			bfw.write(BotStatus.mazeMap.toString());
+
+			bfw.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

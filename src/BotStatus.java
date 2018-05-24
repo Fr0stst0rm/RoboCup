@@ -5,5 +5,9 @@ public class BotStatus {
 	
 	public static int victimsFound = 0;
 	public static int victimsToFind = 20;
+	
+	public static Point currentPos = new Point(0,0);
+	
+	public static Map mazeMap = new Map();
 
 }

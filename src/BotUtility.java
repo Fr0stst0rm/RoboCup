@@ -236,6 +236,8 @@ public class BotUtility {
 		rotateSensor90DegreesRight();
 
 		us.reset();
+		
+		tile.visited = true;
 
 		return tile;
 	}
