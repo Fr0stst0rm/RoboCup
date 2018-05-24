@@ -38,7 +38,7 @@ public class LeftHandGapFillerMapThing {
 	    }
 	    //right hand
 	    if(direction.equals(Direction.NORTH)){
-	        if(!mapCopy.getMapTile(x,y).wallNorth&&!mapCopy.getMapTile(x,y+1).filled&&mapCopy.getMapTile(x,y+1).isWalkable){
+	        if(!mapCopy.getMapTile(x,y).wallNorth&&!mapCopy.getMapTile(x,y+1).filled){
 	            y++;
 	            searchExit();
 	        }else{
@@ -46,7 +46,7 @@ public class LeftHandGapFillerMapThing {
 	            searchExit();
 	        }
 	    }else if(direction.equals(Direction.SOUTH)){
-	        if(!mapCopy.getMapTile(x,y).wallSouth&&!mapCopy.getMapTile(x,y-1).filled&&mapCopy.getMapTile(x,y-1).isWalkable){
+	        if(!mapCopy.getMapTile(x,y).wallSouth&&!mapCopy.getMapTile(x,y-1).filled){
 	            y--;
 	            searchExit();
 	        }else{
@@ -54,7 +54,7 @@ public class LeftHandGapFillerMapThing {
 	            searchExit();
 	        }
 	    }else if(direction.equals(Direction.EAST)){
-	        if(!mapCopy.getMapTile(x,y).wallEast&&!mapCopy.getMapTile(x-1,y).filled&&mapCopy.getMapTile(x-1,y).isWalkable){
+	        if(!mapCopy.getMapTile(x,y).wallEast&&!mapCopy.getMapTile(x-1,y).filled){
 	            x--;
 	            searchExit();
 	        }else{
@@ -63,7 +63,7 @@ public class LeftHandGapFillerMapThing {
 	            //fals drehen kein step hier step--
 	        }
 	    }else if(direction.equals(Direction.WEST)) {
-	        if (!mapCopy.getMapTile(x,y).wallWest&&!mapCopy.getMapTile(x+1,y).filled&&mapCopy.getMapTile(x+1,y).isWalkable) {
+	        if (!mapCopy.getMapTile(x,y).wallWest&&!mapCopy.getMapTile(x+1,y).filled) {
 	            x++;
 	            searchExit();
 	        } else {
