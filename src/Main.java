@@ -14,7 +14,7 @@ public class Main {
 
 	public Main() throws InterruptedException {
 
-		LCD.drawString("V 0.16", 0, 0);
+		LCD.drawString("V 0.17", 0, 0);
 		Button.waitForAnyPress();
 
 		//		LCD.drawString("Scann path", 0, 0);
