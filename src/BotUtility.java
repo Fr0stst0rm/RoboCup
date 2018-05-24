@@ -1,4 +1,5 @@
 import lejos.nxt.LCD;
+import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
@@ -28,12 +29,14 @@ public class BotUtility {
 		}
 	}
 
-	public static void driveToNextTile() {
-		//TODO
-	}
-
-	public static void handleChasm() {
-		//TODO
+	public static void handleChasm(LightSensor lightsensor) {
+		Motor.A.stop();
+		Motor.C.stop();
+    	LCD.drawString("Chasm detected!", 0, 1);
+    	while(lightsensor.getLightValue()<=37) {
+    		move(-0.1f);
+    	}
+    	moveHalfTileBackwards();
 	}
 
 	public static void handleVictim() {
@@ -243,16 +246,25 @@ public class BotUtility {
 	}
 
 	public static void moveToNextTile() {
+		move(3);
+	}
+	
+	public static void moveHalfTileBackwards() {
+		move(-1.5f);
+	}
+	
+	public static void move(float rotAmount) {//3 for one Tile, 1.5 for half tile
+		float rotCorrection = rotAmount * 4; 
 		try {
 			Motor.A.setSpeed(300);
 			Motor.C.setSpeed(300);
-			int rot = 350 * 3; // 30 cm
-			Motor.A.rotate(rot - 12, true); //Korrektur, weil motoren nicht gleich stark sind
-			Motor.C.rotate(rot);
+			float rot = 350.0f * rotAmount; // 30 cm
+			Motor.A.rotate((int) (rot - rotCorrection), true); //Korrektur, weil motoren nicht gleich stark sind
+			Motor.C.rotate((int)rot);
 		} catch (IllegalStateException e) {
 			LCD.drawString(e.toString(), 0, 5);
 		}
-
+		
 	}
 
 }
