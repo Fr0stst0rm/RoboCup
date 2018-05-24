@@ -6,7 +6,9 @@ public class MapTile {
 	public boolean wallSouth = false;
 	public boolean wallWest = false;
 
-	public boolean isCheckPoint = true;
+	public boolean isCheckPoint = false;
+	public boolean isStart = false;
+	public boolean isChasm = false;
 
 	public boolean hasVictim = false;
 
@@ -23,36 +25,50 @@ public class MapTile {
 		String str = "";
 
 		int size = 3;
-		
-		if(!visited) {
-			for(int x = 0; x < size; x++) {
-				for(int y = 0; y < size; y++) {
-					if(isCorner(x,y,size)) {
+
+		if (!visited) {
+			for (int x = 0; x < (size + 2); x++) {
+				for (int y = 0; y < (size + 2); y++) {
+					if (isCorner(x, y, (size + 2))) {
 						str += "+";
 					} else {
-						str += "?";
+						if ((y == 0) || ( y == size+1)) {
+							str += "?";
+						} else {
+							str += "??";
+						}
+
 					}
-				}	
+				}
+				str += "\n";
 			}
 			return str;
 		}
+
+		String filler = "  ";
+
+		if (isStart) {
+			filler = "St";
+		}
 		
-		char filler = ' ';
+		if (isCheckPoint) {
+			filler = "CC";
+		}
 		
-		if(isCheckPoint) {
-			filler = 'C';
+		if (isChasm) {
+			filler = "66";
 		}
 
 		if (wallNorth) {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "#";
+				str += "##";
 			}
 			str += "+\n";
 		} else {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "-";
+				str += "--";
 			}
 			str += "+\n";
 		}
@@ -69,11 +85,7 @@ public class MapTile {
 			}
 
 			if (wallEast) {
-				str += "+";
-				for (int x = 0; x < size; x++) {
-					str += "#";
-				}
-				str += "+\n";
+				str += "#";
 			} else {
 				str += "|";
 			}
@@ -83,18 +95,18 @@ public class MapTile {
 		if (wallSouth) {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "#";
+				str += "##";
 			}
 			str += "+\n";
 		} else {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "-";
+				str += "--";
 			}
 			str += "+\n";
 		}
 
-		return super.toString();
+		return str;
 	}
 
 	private boolean isCorner(int x, int y, int size) {

@@ -1,26 +1,30 @@
 import java.util.LinkedList;
 
-import lejos.nxt.LCD;
-
 public class Map extends LinkedList<LinkedList<MapTile>> {
-	// zuert reihen (y) , dann spalten (x)
+	// zuert reihen = line = y = horizointal = height, dann spalten = x = vertical = senkrecht =  width
 
 	Point startPoint = new Point(0, 0);
 
 	Point offset = new Point(0, 0);
 	
-	public void addTile(int x, int y, MapTile tiel) {
+	public void addTile(int x, int y, MapTile tile) {
 		int newX = rearrangeXOffset(x);
 		int newY = rearrangeYOffset(y);
 				
 		while(this.size() <= newY) {
 			this.add(new LinkedList<MapTile>());
 		}
-		while(this.get(newY).size() <= newX) {
+		while(this.get(newY).size() < newX) {
 			this.get(newY).add(new MapTile());
 		}
 		
-		this.get(newY).add(newX, tiel);
+		this.get(newY).add(newX, tile);
+		
+		for (LinkedList<MapTile> line : this) {
+			while(line.size() < this.getWidth()) {
+				line.add(new MapTile());
+			}
+		}
 	}
 
 	public Point getStartPoint() {
@@ -36,7 +40,31 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		int newY = rearrangeYOffset(y);
 		return this.get(newY).get(newX);
 	}
+	
+	public MapTile getCurrentDirNexMapTile() {
+		int x = BotStatus.currentPos.x;
+		int y = BotStatus.currentPos.y;
+		switch (BotStatus.currentDir) {
+		case NORTH:
+			y++;
+			break;
+		case EAST:
+			x++;
+			break;
+		case WEST:
+			x--;
+			break;
+		case SOUTH:
+			y--;
+			break;
+		}
+		
+		int newX = rearrangeXOffset(x);
+		int newY = rearrangeYOffset(y);
+		return this.get(newY).get(newX);
+	}
 
+	//TODO relocate all existing tiles
 	private int rearrangeXOffset(int x) {
 		if ((x - offset.x) < 0) {
 			offset.x = x;
@@ -76,15 +104,15 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 
 		LinkedList<LinkedList<Character>> printHelper = null;
 
-		for (LinkedList<MapTile> line : this) {
+		for (int y = getHeight() - 1; y >= 0; y --) {
 			printHelper = new LinkedList<LinkedList<Character>>();
-			for (MapTile mapTile : line) {
+			for (int x = 0; x < getWidth(); x++) {
 				int newLines = 0;
-				for (Character character : mapTile.toString().toCharArray()) {
-					if (printHelper.size() <= (newLines + 1)) {
+				for (Character character : getMapTile(x, y).toString().toCharArray()) {
+					if (printHelper.size() < (newLines + 1)) {
 						printHelper.add(new LinkedList<Character>());
 					}
-					if (!character.equals('\n')) {
+					if (character.equals('\n')) {
 						newLines++;
 					} else {
 						printHelper.get(newLines).add(character);

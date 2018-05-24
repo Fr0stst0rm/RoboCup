@@ -30,13 +30,15 @@ public class BotUtility {
 	}
 
 	public static void handleChasm(LightSensor lightsensor) {
+		BotStatus.mapping = false;
 		Motor.A.stop();
 		Motor.C.stop();
-    	LCD.drawString("Chasm detected!", 0, 1);
-    	while(lightsensor.getLightValue()<=37) {
-    		move(-0.1f);
-    	}
-    	moveHalfTileBackwards();
+		LCD.drawString("Chasm detected!", 0, 1);
+		while (lightsensor.getLightValue() <= BotStatus.blackTile) {
+			move(-0.1f);
+		}
+		moveHalfTileBackwards();
+		BotStatus.mapping = true;
 	}
 
 	public static void handleVictim() {
@@ -239,7 +241,7 @@ public class BotUtility {
 		rotateSensor90DegreesRight();
 
 		us.reset();
-		
+
 		tile.visited = true;
 
 		return tile;
@@ -247,24 +249,39 @@ public class BotUtility {
 
 	public static void moveToNextTile() {
 		move(3);
+		switch (BotStatus.currentDir) {
+		case NORTH:
+			BotStatus.currentPos.y++;
+			break;
+		case EAST:
+			BotStatus.currentPos.x++;
+			break;
+		case WEST:
+			BotStatus.currentPos.x--;
+			break;
+		case SOUTH:
+			BotStatus.currentPos.y--;
+			break;
+		}
+
 	}
-	
+
 	public static void moveHalfTileBackwards() {
 		move(-1.5f);
 	}
-	
+
 	public static void move(float rotAmount) {//3 for one Tile, 1.5 for half tile
-		float rotCorrection = rotAmount * 4; 
+		float rotCorrection = rotAmount * 4;
 		try {
 			Motor.A.setSpeed(300);
 			Motor.C.setSpeed(300);
 			float rot = 350.0f * rotAmount; // 30 cm
 			Motor.A.rotate((int) (rot - rotCorrection), true); //Korrektur, weil motoren nicht gleich stark sind
-			Motor.C.rotate((int)rot);
+			Motor.C.rotate((int) rot);
 		} catch (IllegalStateException e) {
 			LCD.drawString(e.toString(), 0, 5);
 		}
-		
+
 	}
 
 }
