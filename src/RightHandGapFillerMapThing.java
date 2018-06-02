@@ -15,13 +15,12 @@ public class RightHandGapFillerMapThing {
 		this.mapCopy = map;
 		this.y = startY;
 		this.x = startX;
-		// TODO Auto-generated constructor stub
 	}
 
+	//richtungsstack errechnen undabarbeiten
 	void searchExit(){
-		//TODO: gegebenenfalls is walkable auf false setzen
+		//TODO: handle floating walls
 		//TODO: Walls setzen
-		//TODO: actual movement
 		//TODO: ask if tile null
 		//TODO: if not visited ask sensors for wall
 	    steps++;
