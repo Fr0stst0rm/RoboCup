@@ -16,15 +16,15 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			// Creating a File object that represents the disk file.
-	        PrintStream o = new PrintStream(new FileOutputStream(new File("log.txt")));
-	 
-	        // Store current System.out before assigning a new value
-	        PrintStream console = System.out;
-	 
-	        // Assign o to output stream
-	        System.setOut(o);
-	        System.setErr(o);
-	        
+			PrintStream o = new PrintStream(new FileOutputStream(new File("log.txt")));
+
+			// Store current System.out before assigning a new value
+			PrintStream console = System.out;
+
+			// Assign o to output stream
+			System.setOut(o);
+			System.setErr(o);
+
 			new Main();
 		} catch (Exception e) {
 			LCD.drawString(e.toString(), 0, 0);
@@ -33,7 +33,7 @@ public class Main {
 
 	public Main() {
 
-		LCD.drawString("V 0.37", 0, 0);
+		LCD.drawString("V 0.38", 0, 0);
 		Button.waitForAnyPress();
 
 		//		LCD.drawString("Scann path", 0, 0);
@@ -43,7 +43,7 @@ public class Main {
 		//		LCD.drawString("Scann checkpoint", 0, 1);
 		//		Button.waitForAnyPress();
 		//		// TODO
-		
+
 		LCD.drawString("Scann pit", 0, 2);
 		Button.waitForAnyPress();
 
@@ -73,7 +73,7 @@ public class Main {
 		ChasmChecker cc = new ChasmChecker();
 		cc.start();
 
-		//Start
+		//Start Tile
 		MapTile start = BotUtility.scanWalls();
 		if ((BotStatus.currentPos.x == 0) && (BotStatus.currentPos.y == 0)) {
 			start.isStart = true;
@@ -81,11 +81,23 @@ public class Main {
 		}
 		BotStatus.mazeMap.addTile(BotStatus.currentPos.x, BotStatus.currentPos.y, start);
 
+		//Map all tiles, while not all victims have been found or until the map is complete
 		while (BotStatus.victimsFound < BotStatus.victimsToFind) {
 			LCD.clear();
 			LCD.drawString("Vics found: " + BotStatus.victimsFound, 0, 0);
 
-			BotUtility.moveToNextTile();
+			//WEnn keine Wand und noch nicht besucht
+			if (!BotStatus.mazeMap.checkWall(BotStatus.currentPos, BotStatus.currentDir) && !BotStatus.mazeMap.getNextMapTile(BotStatus.currentDir).visited) {
+				BotUtility.moveToNextTile();
+			} else {
+				if (BotStatus.mazeMap.checkWall(BotStatus.currentPos, BotStatus.getLeft())) {
+					
+				} else if (BotStatus.mazeMap.checkWall(BotStatus.currentPos, BotStatus.getRight())) {
+
+				} else if (BotStatus.mazeMap.checkWall(BotStatus.currentPos, BotStatus.getBack())) {
+
+				}
+			}
 
 			if (BotStatus.mapping) {
 				MapTile tile = BotUtility.scanWalls();
@@ -99,13 +111,14 @@ public class Main {
 						e.printStackTrace();
 					}
 				}
-				MapTile chasm = BotStatus.mazeMap.getCurrentDirNexMapTile();
+				MapTile chasm = new MapTile();
 				chasm.visited = true;
 				chasm.isChasm = true;
 				chasm.wallNorth = true;
 				chasm.wallEast = true;
 				chasm.wallSouth = true;
 				chasm.wallWest = true;
+				BotStatus.mazeMap.addTile(BotStatus.getNextTileCoordinates(BotStatus.currentDir), chasm);
 
 			}
 
@@ -122,6 +135,7 @@ public class Main {
 		Button.waitForAnyPress();
 
 		printMapToFile();
+
 	}
 
 	public void printMapToFile() {
