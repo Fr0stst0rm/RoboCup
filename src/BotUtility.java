@@ -95,6 +95,7 @@ public class BotUtility {
 		}
 	}
 
+	//TODO add victim detection
 	public static MapTile scanWalls() {
 		MapTile tile = new MapTile();
 

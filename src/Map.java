@@ -6,23 +6,57 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 	Point startPoint = new Point(0, 0);
 
 	Point offset = new Point(0, 0);
-	
+
 	public void addTile(int x, int y, MapTile tile) {
 		int newX = rearrangeXOffset(x);
 		int newY = rearrangeYOffset(y);
-				
-		while(this.size() <= newY) {
+
+		while (this.size() <= newY) {
 			this.add(new LinkedList<MapTile>());
 		}
-		while(this.get(newY).size() < newX) {
+		while (this.get(newY).size() < newX) {
 			this.get(newY).add(new MapTile());
 		}
-		
+
 		this.get(newY).add(newX, tile);
-		
+
 		for (LinkedList<MapTile> line : this) {
-			while(line.size() < this.getWidth()) {
+			while (line.size() < this.getWidth()) {
 				line.add(new MapTile());
+			}
+		}
+
+		//Add walls to connected tiles
+		
+		if(tile.wallNorth) {
+			try {
+				getMapTile(newX, newY, Direction.NORTH).wallSouth = true;
+			} catch (IndexOutOfBoundsException e) {
+				
+			}
+		}
+		
+		if(tile.wallEast) {
+			try {
+				getMapTile(newX, newY, Direction.EAST).wallWest = true;
+			} catch (IndexOutOfBoundsException e) {
+				
+			}
+		}
+		
+		if(tile.wallSouth) {
+			try {
+				getMapTile(newX, newY, Direction.SOUTH).wallNorth = true;
+			} catch (IndexOutOfBoundsException e) {
+				
+			}
+		}
+		
+		if(tile.wallWest) {
+			try {
+				getMapTile(newX, newY, Direction.WEST).wallEast = true;
+			} catch (IndexOutOfBoundsException e) {
+				
 			}
 		}
 	}
@@ -40,28 +74,9 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		int newY = rearrangeYOffset(y);
 		return this.get(newY).get(newX);
 	}
-	
-	public MapTile getCurrentDirNexMapTile() {
-		int x = BotStatus.currentPos.x;
-		int y = BotStatus.currentPos.y;
-		switch (BotStatus.currentDir) {
-		case NORTH:
-			y++;
-			break;
-		case EAST:
-			x++;
-			break;
-		case WEST:
-			x--;
-			break;
-		case SOUTH:
-			y--;
-			break;
-		}
-		
-		int newX = rearrangeXOffset(x);
-		int newY = rearrangeYOffset(y);
-		return this.get(newY).get(newX);
+
+	public MapTile getNextMapTile(Direction dir) {
+		return getMapTile(BotStatus.currentPos, dir);
 	}
 
 	//TODO relocate all existing tiles
@@ -104,7 +119,7 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 
 		LinkedList<LinkedList<Character>> printHelper = null;
 
-		for (int y = getHeight() - 1; y >= 0; y --) {
+		for (int y = getHeight() - 1; y >= 0; y--) {
 			printHelper = new LinkedList<LinkedList<Character>>();
 			for (int x = 0; x < getWidth(); x++) {
 				int newLines = 0;
@@ -125,6 +140,80 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		}
 
 		return str;
+	}
+
+	public boolean checkWall(int x, int y, Direction dir) {
+
+		MapTile tile = this.getMapTile(x, y);
+
+		switch (dir) {
+		case NORTH:
+			return tile.wallNorth;
+		case EAST:
+			return tile.wallEast;
+		case SOUTH:
+			return tile.wallSouth;
+		case WEST:
+			return tile.wallWest;
+		}
+		return false;
+	}
+
+	public boolean checkWall(Point currentPos, Direction dir) {
+		return checkWall(currentPos.x, currentPos.y, dir);
+	}
+
+	public Point getNextTileCoordinates(Direction dir) {
+		int x = BotStatus.currentPos.x;
+		int y = BotStatus.currentPos.y;
+
+		switch (dir) {
+		case NORTH:
+			y++;
+			break;
+		case EAST:
+			x++;
+			break;
+		case WEST:
+			x--;
+			break;
+		case SOUTH:
+			y--;
+			break;
+		}
+
+		int newX = rearrangeXOffset(x);
+		int newY = rearrangeYOffset(y);
+		return new Point(newX, newY);
+	}
+
+	public void addTile(Point coordinates, MapTile chasm) {
+		addTile(coordinates.x, coordinates.y, chasm);
+	}
+
+	public MapTile getMapTile(Point p, Direction north) {
+		return getMapTile(p.x, p.y, north);
+	}
+
+	public MapTile getMapTile(int x, int y, Direction dir) {
+		switch (dir) {
+		case NORTH:
+			y++;
+			break;
+		case EAST:
+			x++;
+			break;
+		case WEST:
+			x--;
+			break;
+		case SOUTH:
+			y--;
+			break;
+		}
+
+		int newX = rearrangeXOffset(x);
+		int newY = rearrangeYOffset(y);
+		return this.get(newY).get(newX);
 	}
 
 }

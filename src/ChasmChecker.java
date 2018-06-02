@@ -29,7 +29,9 @@ public class ChasmChecker implements Runnable {
 		while (!stop) {
 			if (light == null) {
 				light = new LightSensor(SensorPort.S2);
-			} else {
+				light.setFloodlight(true);
+			}
+			if (light != null) {
 				LCD.drawInt(light.getLightValue(), 4, 0, 4);
 				if (light.getLightValue() <= BotStatus.blackTile) {
 					BotUtility.handleChasm(light);
