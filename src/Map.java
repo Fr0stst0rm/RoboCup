@@ -1,7 +1,8 @@
 import java.util.LinkedList;
 
 public class Map extends LinkedList<LinkedList<MapTile>>{
-	// zuert reihen = line = y = horizointal = height, dann spalten = x = vertical = senkrecht =  width
+
+	// zuert reihen = zeilen = line = y = horizointal = height, dann spalten = x = vertical = senkrecht =  width
 
 	Point startPoint = new Point(0, 0);
 
@@ -18,7 +19,11 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 			this.get(newY).add(new MapTile());
 		}
 
-		this.get(newY).add(newX, tile);
+		if(newX == this.get(newY).size()) {
+			this.get(newY).add(tile);
+		} else {
+			this.get(newY).set(newX, tile);
+		}
 
 		for (LinkedList<MapTile> line : this) {
 			while (line.size() < this.getWidth()) {
@@ -27,38 +32,54 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 		}
 
 		//Add walls to connected tiles
+
 		
-		if(tile.wallNorth) {
 			try {
-				getMapTile(newX, newY, Direction.NORTH).wallSouth = true;
+				if(getDirectMapTile(newX, newY, Direction.NORTH).wallSouth == true) {
+					tile.wallNorth = true;
+				} else if (tile.wallNorth) {
+					getDirectMapTile(newX, newY, Direction.NORTH).wallSouth = true;	
+				}
 			} catch (IndexOutOfBoundsException e) {
-				
+
 			}
-		}
 		
-		if(tile.wallEast) {
-			try {
-				getMapTile(newX, newY, Direction.EAST).wallWest = true;
-			} catch (IndexOutOfBoundsException e) {
-				
-			}
-		}
+
 		
-		if(tile.wallSouth) {
 			try {
-				getMapTile(newX, newY, Direction.SOUTH).wallNorth = true;
+				if(getDirectMapTile(newX, newY, Direction.EAST).wallWest == true) {
+					tile.wallEast = true;
+				} else if (tile.wallEast) {
+				getDirectMapTile(newX, newY, Direction.EAST).wallWest = true;
+				}
 			} catch (IndexOutOfBoundsException e) {
-				
+
 			}
-		}
 		
-		if(tile.wallWest) {
+
+		
 			try {
-				getMapTile(newX, newY, Direction.WEST).wallEast = true;
+				if(getDirectMapTile(newX, newY, Direction.NORTH).wallNorth == true) {
+					tile.wallSouth = true;
+				} else if (tile.wallSouth) {
+				getDirectMapTile(newX, newY, Direction.SOUTH).wallNorth = true;
+				}
 			} catch (IndexOutOfBoundsException e) {
-				
+
 			}
-		}
+		
+
+		
+			try {
+				if(getDirectMapTile(newX, newY, Direction.NORTH).wallEast == true) {
+					tile.wallWest = true;
+				} else if (tile.wallWest) {
+				getDirectMapTile(newX, newY, Direction.WEST).wallEast = true;
+				}
+			} catch (IndexOutOfBoundsException e) {
+
+			}
+		
 	}
 
 	public Point getStartPoint() {
@@ -82,7 +103,9 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 	//TODO relocate all existing tiles
 	private int rearrangeXOffset(int x) {
 		if ((x - offset.x) < 0) {
+			int offsetDif = offset.x - x;
 			offset.x = x;
+			shiftXRight(offsetDif);
 			//LCD.drawString("New X Offset: " + offset.x, 0, 0);
 			System.out.println("New X Offset: " + offset.x);
 		}
@@ -90,13 +113,52 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 	}
 
 	private int rearrangeYOffset(int y) {
-		int newY = y - offset.y;
 		if ((y - offset.y) < 0) {
+			int offsetDif = offset.y - y;
 			offset.y = y;
+			shiftYRight(offsetDif);
 			//LCD.drawString("New Y Offset: " + offset.y, 0, 1);
 			System.out.println("New Y Offset: " + offset.y);
 		}
 		return (y - offset.y);
+	}
+
+	private void shiftYRight(int shiftAmount) {
+		for (; shiftAmount > 0; shiftAmount--) {
+			LinkedList<MapTile> line = new LinkedList<>();
+			for(int i = 0; i < getWidth(); i++ ) {
+				line.add(new MapTile());
+			}
+			
+			LinkedList<LinkedList<MapTile>> temp = new LinkedList<>(this);
+			
+			this.clear();
+			
+			this.add(line);
+			
+			for (LinkedList<MapTile> linkedList : temp) {
+				this.add(linkedList);
+			}
+			
+		}
+	}
+
+	private void shiftXRight(int shiftAmount) {
+		for (; shiftAmount > 0; shiftAmount--) {
+			for (LinkedList<MapTile> line : this) {
+				
+				LinkedList<MapTile> temp = new LinkedList<>(line);
+				
+				line.clear();
+				
+				line.add(new MapTile());
+				
+				for (MapTile tile : temp) {
+					line.add(tile);
+				}
+			}
+		}
+
 	}
 
 	public int getHeight() {
@@ -123,7 +185,7 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 			printHelper = new LinkedList<LinkedList<Character>>();
 			for (int x = 0; x < getWidth(); x++) {
 				int newLines = 0;
-				for (Character character : getMapTile(x, y).toString().toCharArray()) {
+				for (Character character : this.get(y).get(x).toString().toCharArray()) {
 					if (printHelper.size() < (newLines + 1)) {
 						printHelper.add(new LinkedList<Character>());
 					}
@@ -214,6 +276,25 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 		int newX = rearrangeXOffset(x);
 		int newY = rearrangeYOffset(y);
 		return this.get(newY).get(newX);
+	}
+	
+	private MapTile getDirectMapTile(int x, int y, Direction dir) {
+		switch (dir) {
+		case NORTH:
+			y++;
+			break;
+		case EAST:
+			x++;
+			break;
+		case WEST:
+			x--;
+			break;
+		case SOUTH:
+			y--;
+			break;
+		}
+
+		return this.get(y).get(x);
 	}
 
 }
