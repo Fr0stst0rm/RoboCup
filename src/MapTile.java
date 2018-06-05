@@ -24,6 +24,9 @@ public class MapTile {
 	public String toString() {
 		String str = "";
 
+		String noWallHorizontal = "--";
+		String noWallVertical = "|";
+		
 		int size = 3;
 
 		if (!visited) {
@@ -68,7 +71,7 @@ public class MapTile {
 		} else {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "--";
+				str += noWallHorizontal;
 			}
 			str += "+\n";
 		}
@@ -77,7 +80,7 @@ public class MapTile {
 			if (wallWest) {
 				str += "#";
 			} else {
-				str += "|";
+				str += noWallVertical;
 			}
 
 			for (int x = 0; x < size; x++) {
@@ -87,7 +90,7 @@ public class MapTile {
 			if (wallEast) {
 				str += "#";
 			} else {
-				str += "|";
+				str += noWallVertical;
 			}
 			str += "\n";
 		}
@@ -101,7 +104,7 @@ public class MapTile {
 		} else {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "--";
+				str += noWallHorizontal;
 			}
 			str += "+\n";
 		}
