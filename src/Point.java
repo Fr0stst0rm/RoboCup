@@ -23,6 +23,10 @@ public class Point {
 	public void setY(int y) {
 		this.y = y;
 	}
+
+	public boolean equals(Point p){
+		return p.getX() == this.x && p.getY() == this.y;
+	}
 	
 	
 	

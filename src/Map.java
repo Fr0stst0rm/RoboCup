@@ -1,6 +1,6 @@
 import java.util.LinkedList;
 
-public class Map extends LinkedList<LinkedList<MapTile>> {
+public class Map extends LinkedList<LinkedList<MapTile>>{
 	// zuert reihen = line = y = horizointal = height, dann spalten = x = vertical = senkrecht =  width
 
 	Point startPoint = new Point(0, 0);
