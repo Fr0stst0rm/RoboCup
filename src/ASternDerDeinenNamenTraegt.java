@@ -10,13 +10,13 @@ public class ASternDerDeinenNamenTraegt {
 	private Point start;
 
 	private ANode startNode;
-	private ANode currNode = startNode;
+	private ANode currNode;
 	private ANode currNNode = null;
 	private ANode currENode = null;
 	private ANode currSNode = null;
 	private ANode currWNode = null;
 
-	private Map map;
+	private Map map = BotStatus.mazeMap;
 
 	private int movementCost = 10;	//G Value
 
@@ -25,10 +25,9 @@ public class ASternDerDeinenNamenTraegt {
 	private List<ANode> closedList = new ArrayList<>();
 	private boolean searching = true;
 
-	public ASternDerDeinenNamenTraegt(Point start, Point goal, Map map) {
+	public ASternDerDeinenNamenTraegt(Point start, Point goal) {
 		this.start = start;
 		this.goal = goal;
-		this.map = map;
 	}
 	
 	private void createNodes() {
@@ -50,8 +49,11 @@ public class ASternDerDeinenNamenTraegt {
 	}
 	
 	private void calculatePath() {
+		System.out.println("Adding to closed list X: " + startNode.getPoint().getX() + " Y: " + startNode.getPoint().getY() + "\n" );
 		closedList.add(startNode);
+		currNode = startNode;
 		//set all reachable(do not forget to check for walls) from current node to open list and parent them (g value is parent g value + movement cost) to start node
+		setUPReachableNodes();
 		setUpNode(currNNode);
 		setUpNode(currENode);
 		setUpNode(currSNode);
@@ -64,6 +66,7 @@ public class ASternDerDeinenNamenTraegt {
 			//take the one with least cost from open list and add it to closed list
 			currNode = getNearestNode();
 			closedList.add(currNode);
+			System.out.println("Adding to closed list X: " + currNode.getPoint().getX() + " Y: " + currNode.getPoint().getY() + "\n" );
 			setUPReachableNodes();
 			//check reachable nodes around
 
@@ -76,11 +79,14 @@ public class ASternDerDeinenNamenTraegt {
 				//reparent to current node
 			if(currNNode!=null){
 				checkNode(currNNode);
-			}else if(currSNode!=null){
+			}
+			if(currSNode!=null){
 				checkNode(currSNode);
-			}else if(currWNode!=null){
+			}
+			if(currWNode!=null){
 				checkNode(currWNode);
-			}else if(currENode!=null){
+			}
+			if(currENode!=null){
 				checkNode(currENode);
 			}
 		}
@@ -90,7 +96,9 @@ public class ASternDerDeinenNamenTraegt {
 	private void checkNode(ANode node){
 		if(node.getPoint().equals(goal)){
 			node.setParent(currNode);
+			System.out.println("Removing from open list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
 			openList.remove(node);
+			System.out.println("Adding to closed list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
 			closedList.add(node);
 			searching = false;
 		}else if (openList.contains(node)){
@@ -103,7 +111,7 @@ public class ASternDerDeinenNamenTraegt {
 		}
 	}
 
-	private ANode getNearestNode(){
+	private ANode getNearestNode() {
 		int lowestCost = 0;
 		int lowestCostIndex = -1;
 
@@ -118,6 +126,8 @@ public class ASternDerDeinenNamenTraegt {
 		}
 
 		ANode temp = openList.get(lowestCostIndex);
+		System.out.println("Removing from open list X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
+
 		openList.remove(lowestCostIndex);
 
 		return temp;
@@ -130,13 +140,13 @@ public class ASternDerDeinenNamenTraegt {
 		currWNode = null;
 
 		for(ANode anode : nodes){
-			if(anode.getPoint().getX() == currNode.getPoint().getX()&&anode.getPoint().getY() == currNode.getPoint().getY()-1&&anode.passable()&&!anode.wallSouth()&&!currNode.wallNorth()&&!closedList.contains(anode)){
+			if(anode.getPoint().getX() == currNode.getPoint().getX()&&anode.getPoint().getY() == currNode.getPoint().getY()+1&&anode.passable()&&!currNode.wallNorth()&&!closedList.contains(anode)){
 				currNNode = anode;
-			}else if(anode.getPoint().getX() == currNode.getPoint().getX()+1&&anode.getPoint().getY() == currNode.getPoint().getY()&&anode.passable()&&!currNode.wallEast()&&!anode.wallWest()&&!closedList.contains(anode)){
+			}else if(anode.getPoint().getX() == currNode.getPoint().getX()+1&&anode.getPoint().getY() == currNode.getPoint().getY()&&anode.passable()&&!currNode.wallEast()&&!closedList.contains(anode)){
 				currENode = anode;
-			}else if(anode.getPoint().getX() == currNode.getPoint().getX()&&anode.getPoint().getY() == currNode.getPoint().getY()+1&&anode.passable()&&!anode.wallNorth()&&!currNode.wallSouth()&&!closedList.contains(anode)){
+			}else if(anode.getPoint().getX() == currNode.getPoint().getX()&&anode.getPoint().getY() == currNode.getPoint().getY()-1&&anode.passable()&&!currNode.wallSouth()&&!closedList.contains(anode)){
 				currSNode = anode;
-			}else if(anode.getPoint().getX() == currNode.getPoint().getX()-1&&anode.getPoint().getY() == currNode.getPoint().getY()&&anode.passable()&&!anode.wallEast()&&!currNode.wallWest()&&!closedList.contains(anode)){
+			}else if(anode.getPoint().getX() == currNode.getPoint().getX()-1&&anode.getPoint().getY() == currNode.getPoint().getY()&&anode.passable()&&!currNode.wallWest()&&!closedList.contains(anode)){
 				currWNode = anode;
 			}
 		}
@@ -146,6 +156,7 @@ public class ASternDerDeinenNamenTraegt {
 		if(node !=null){
 			node.setParent(currNode);
 			node.setG_Value(currNode.getG_Value()+movementCost);
+			System.out.println("Adding to open list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
 			openList.add(node);
 		}
 	}
@@ -170,12 +181,13 @@ public class ASternDerDeinenNamenTraegt {
 
 		ANode temp = goal;
 		Path path = new Path(goal.getPoint());
+		System.out.println("X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
 
 		//backtrack from start to finish via parent
 		//iterate backwards
 		while(temp.getParent()!=null){
 			temp = temp.getParent();
-			System.out.println("X:" + temp.getPoint().getX() + "Y: " + temp.getPoint().getY() + "\n" );
+			System.out.println("X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
 			path.push(temp.getPoint());
 		}
 		return path;
