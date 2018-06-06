@@ -32,6 +32,14 @@ public class Point {
 		return new Point(x + offset.x, y + offset.y);
 	}
 	
-	
+	@Override
+	public boolean equals(Object aOther) {
+		if(aOther instanceof Point) {
+			if((x ==((Point)aOther).x) && (y ==((Point)aOther).y)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }

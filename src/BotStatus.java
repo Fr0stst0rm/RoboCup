@@ -77,4 +77,63 @@ public class BotStatus {
 		return mazeMap.getNextTileCoordinates(dir);
 	}
 
+	public static int calculateTurnesToDir(Direction dir) {
+		int turns = 0;
+		switch (currentDir) {
+		case NORTH:
+			switch (dir) {
+			case EAST:
+				turns = 1;
+				break;
+			case SOUTH:
+				turns = 2;
+				break;
+			case WEST:
+				turns = -1;
+				break;
+			}
+			break;
+		case EAST:
+			switch (dir) {
+			case NORTH:
+				turns = -1;
+				break;
+			case SOUTH:
+				turns = 1;
+				break;
+			case WEST:
+				turns = 2;
+				break;
+			}
+			break;
+		case SOUTH:
+			switch (dir) {
+			case EAST:
+				turns = -1;
+				break;
+			case NORTH:
+				turns = 2;
+				break;
+			case WEST:
+				turns = 1;
+				break;
+			}
+			break;
+		case WEST:
+			switch (dir) {
+			case EAST:
+				turns = 2;
+				break;
+			case SOUTH:
+				turns = 1;
+				break;
+			case NORTH:
+				turns = -1;
+				break;
+			}
+			break;
+		}
+		return turns;
+	}
+
 }

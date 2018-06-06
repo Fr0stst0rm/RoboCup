@@ -123,7 +123,7 @@ public class BotUtility {
 	public static MapTile scanWalls() {
 		MapTile tile = new MapTile();
 
-		int wallDistance = 20;
+		int wallDistance = 25;
 
 		int MAX_DISTANCE = 50; // In centimeters
 		int PERIOD = 250; // In milliseconds
@@ -281,7 +281,6 @@ public class BotUtility {
 			BotStatus.currentPos.y--;
 			break;
 		}
-
 	}
 
 	public static void moveHalfTileBackwards() {
@@ -293,7 +292,7 @@ public class BotUtility {
 		try {
 			Motor.A.setSpeed(300);
 			Motor.C.setSpeed(300);
-			float rot = 350.0f * rotAmount; // 30 cm
+			float rot = 373.5f * rotAmount; // 30 cm
 			Motor.A.rotate((int) (rot - rotCorrection), true); //Korrektur, weil motoren nicht gleich stark sind
 			Motor.C.rotate((int) rot);
 		} catch (IllegalStateException e) {

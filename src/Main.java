@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
@@ -13,11 +14,15 @@ import lejos.nxt.SensorPort;
 public class Main {
 
 	public static void main(String[] args) {
+		
+		System.setOut(new PrintStream(new SysLogStream()));
+		System.setErr(new PrintStream(new SysLogStream()));
+		
 		new Main();
 	}
 
 	public Main() {
-		LCD.drawString("V 0.39", 0, 0);
+		LCD.drawString("V 0.40", 0, 0);
 		Button.waitForAnyPress();
 
 		scanTileColors();
@@ -88,7 +93,59 @@ public class Main {
 				Path pathToCrossRoad = aStern.getPath();
 				
 				while(!pathToCrossRoad.empty()) {
+					Direction nextDir = null;
 					Point nextPoint = pathToCrossRoad.pop().add(BotStatus.mazeMap.offset);
+					
+					Point testPoint = BotStatus.currentPos;
+					
+					testPoint.x ++;
+					
+					if(testPoint.equals(nextPoint)) {
+						nexDir = Direction.EAST;
+					}
+					
+					testPoint = BotStatus.currentPos;
+					
+					testPoint.x --;
+					
+					if(testPoint.equals(nextPoint)) {
+						nexDir = Direction.WEST;
+					}
+					
+					testPoint = BotStatus.currentPos;
+					
+					testPoint.y ++;
+					
+					if(testPoint.equals(nextPoint)) {
+						nexDir = Direction.EAST;
+					}
+					
+					testPoint = BotStatus.currentPos;
+					
+					testPoint.y --;
+					
+					if(testPoint.equals(nextPoint)) {
+						nexDir = Direction.EAST;
+					}
+					
+					int turns = BotStatus.calculateTurnesToDir(nexDir);
+					
+					System.out.println("Current dir " + BotStatus.currentDir.name());
+					System.out.println("Desired dir " + nexDir.name());
+					System.out.println("Turns: " + turns);
+					
+					if(turns > 0) {
+						for(;turns > 0; turns --) {
+							BotUtility.rotate90DegreesRight();
+						}
+					} else if(turns < 0) {
+						turns = -1 * turns;
+						for(;turns > 0; turns --) {
+							BotUtility.rotate90DegreesLeft();
+						}
+					}
+					
+					BotUtility.moveToNextTile();
 					
 				}
 				
