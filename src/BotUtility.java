@@ -61,7 +61,7 @@ public class BotUtility {
 		LCD.clear();
 		LCD.drawString("ObjTemp=" + (int)obj, 1, 1);
 		LCD.drawString("AmbTemp=" + (int)amb, 1, 2);
-		if(obj > amb + 5) {
+		if(obj > amb + 15) {
 			BotStatus.victimsFound++;
 			return true;		
 		}
