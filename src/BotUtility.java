@@ -53,7 +53,7 @@ public class BotUtility {
 		thermal = new DThermalIR(SensorPort.S4);
 		//thermal.setEmissivity(0.53f);
 		System.out.println(thermal.readEmissivity());
-		Button.ENTER.waitForPressAndRelease();
+		//Button.ENTER.waitForPressAndRelease();
 		
 		
 		float obj = thermal.readObject();
@@ -61,7 +61,7 @@ public class BotUtility {
 		LCD.clear();
 		LCD.drawString("ObjTemp=" + (int)obj, 1, 1);
 		LCD.drawString("AmbTemp=" + (int)amb, 1, 2);
-		if(obj > amb + 2) {
+		if(obj > amb + 5) {
 			BotStatus.victimsFound++;
 			return true;		
 		}
