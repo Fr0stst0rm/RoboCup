@@ -1,7 +1,9 @@
+import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
 import lejos.robotics.objectdetection.Feature;
 import lejos.robotics.objectdetection.FeatureDetector;
@@ -42,7 +44,29 @@ public class BotUtility {
 	}
 
 	public static void handleVictim() {
-		//TODO
+		Sound.playTone(500,5000);	
+	}
+	
+	public static boolean scanForVictims() {
+		DThermalIR thermal;
+		   
+		thermal = new DThermalIR(SensorPort.S4);
+		//thermal.setEmissivity(0.53f);
+		System.out.println(thermal.readEmissivity());
+		Button.ENTER.waitForPressAndRelease();
+		
+		
+		float obj = thermal.readObject();
+		float amb = thermal.readAmbient();
+		LCD.clear();
+		LCD.drawString("ObjTemp=" + (int)obj, 1, 1);
+		LCD.drawString("AmbTemp=" + (int)amb, 1, 2);
+		if(obj > amb + 2) {
+			BotStatus.victimsFound++;
+			return true;		
+		}
+		return false;
+		
 	}
 
 	public static void rotate90DegreesLeft() {
@@ -114,7 +138,6 @@ public class BotUtility {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -138,11 +161,9 @@ public class BotUtility {
 							tile.wallSouth = true;
 							break;
 						}
-						//TODO scan for victim
-						//if(victim == true){
-						//handleVictim();
-						BotStatus.victimsFound = BotStatus.victimsToFind;
-						//}
+						if(scanForVictims()){
+							handleVictim();
+						}
 						next = true;
 					}
 				}
@@ -181,11 +202,9 @@ public class BotUtility {
 							tile.wallWest = true;
 							break;
 						}
-						//TODO scan for victim
-						//if(victim == true){
-						//handleVictim();
-						BotStatus.victimsFound = BotStatus.victimsToFind;
-						//}
+						if(scanForVictims()){
+							handleVictim();
+						}
 						next = true;
 					}
 				}
@@ -226,11 +245,9 @@ public class BotUtility {
 							tile.wallEast = true;
 							break;
 						}
-						//TODO scan for victim
-						//if(victim == true){
-						//handleVictim();
-						BotStatus.victimsFound = BotStatus.victimsToFind;
-						//}
+						if(scanForVictims()){
+							handleVictim();
+						}
 						next = true;
 					}
 				}

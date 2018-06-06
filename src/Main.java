@@ -76,6 +76,7 @@ public class Main {
 					LCD.drawString("Something went wrong!", 0, 0);
 					LCD.drawString("Bot is back", 0, 1);
 					LCD.drawString("on start tile", 0, 2);
+					Button.waitForAnyPress();
 					return;
 				}
 				
@@ -95,6 +96,7 @@ public class Main {
 				BotStatus.mazeMap.getMapTile(BotStatus.currentPos);
 			}
 			
+			Button.waitForAnyPress();
 			
 		}
 
