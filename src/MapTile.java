@@ -127,5 +127,27 @@ public class MapTile {
 		}
 		return false;
 	}
+	
+	public boolean isDeadEnd() {
+		int wallCount = 0;
+		
+		if(wallNorth) {
+			wallCount ++;
+		}
+		
+		if(wallSouth) {
+			wallCount ++;
+		}
+		
+		if(wallEast) {
+			wallCount ++;
+		}
+		
+		if(wallEast) {
+			wallCount ++;
+		}
+		
+		return (wallCount >= 3);
+	}
 
 }

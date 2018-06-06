@@ -1,6 +1,6 @@
 import java.util.LinkedList;
 
-public class Map extends LinkedList<LinkedList<MapTile>>{
+public class Map extends LinkedList<LinkedList<MapTile>> {
 
 	// zuert reihen = zeilen = line = y = horizointal = height, dann spalten = x = vertical = senkrecht =  width
 
@@ -19,7 +19,7 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 			this.get(newY).add(new MapTile());
 		}
 
-		if(newX == this.get(newY).size()) {
+		if (newX == this.get(newY).size()) {
 			this.get(newY).add(tile);
 		} else {
 			this.get(newY).set(newX, tile);
@@ -33,53 +33,46 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 
 		//Add walls to connected tiles
 
-		
-			try {
-				if(getDirectMapTile(newX, newY, Direction.NORTH).wallSouth == true) {
-					tile.wallNorth = true;
-				} else if (tile.wallNorth) {
-					getDirectMapTile(newX, newY, Direction.NORTH).wallSouth = true;	
-				}
-			} catch (IndexOutOfBoundsException e) {
-
+		try {
+			if (getDirectMapTile(newX, newY, Direction.NORTH).wallSouth == true) {
+				tile.wallNorth = true;
+			} else if (tile.wallNorth) {
+				getDirectMapTile(newX, newY, Direction.NORTH).wallSouth = true;
 			}
-		
+		} catch (IndexOutOfBoundsException e) {
 
-		
-			try {
-				if(getDirectMapTile(newX, newY, Direction.EAST).wallWest == true) {
-					tile.wallEast = true;
-				} else if (tile.wallEast) {
+		}
+
+		try {
+			if (getDirectMapTile(newX, newY, Direction.EAST).wallWest == true) {
+				tile.wallEast = true;
+			} else if (tile.wallEast) {
 				getDirectMapTile(newX, newY, Direction.EAST).wallWest = true;
-				}
-			} catch (IndexOutOfBoundsException e) {
-
 			}
-		
+		} catch (IndexOutOfBoundsException e) {
 
-		
-			try {
-				if(getDirectMapTile(newX, newY, Direction.NORTH).wallNorth == true) {
-					tile.wallSouth = true;
-				} else if (tile.wallSouth) {
+		}
+
+		try {
+			if (getDirectMapTile(newX, newY, Direction.NORTH).wallNorth == true) {
+				tile.wallSouth = true;
+			} else if (tile.wallSouth) {
 				getDirectMapTile(newX, newY, Direction.SOUTH).wallNorth = true;
-				}
-			} catch (IndexOutOfBoundsException e) {
-
 			}
-		
+		} catch (IndexOutOfBoundsException e) {
 
-		
-			try {
-				if(getDirectMapTile(newX, newY, Direction.NORTH).wallEast == true) {
-					tile.wallWest = true;
-				} else if (tile.wallWest) {
+		}
+
+		try {
+			if (getDirectMapTile(newX, newY, Direction.NORTH).wallEast == true) {
+				tile.wallWest = true;
+			} else if (tile.wallWest) {
 				getDirectMapTile(newX, newY, Direction.WEST).wallEast = true;
-				}
-			} catch (IndexOutOfBoundsException e) {
-
 			}
-		
+		} catch (IndexOutOfBoundsException e) {
+
+		}
+
 	}
 
 	public Point getStartPoint() {
@@ -101,7 +94,7 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 	}
 
 	//TODO relocate all existing tiles
-	private int rearrangeXOffset(int x) {
+	public int rearrangeXOffset(int x) {
 		if ((x - offset.x) < 0) {
 			int offsetDif = offset.x - x;
 			offset.x = x;
@@ -112,7 +105,7 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 		return (x - offset.x);
 	}
 
-	private int rearrangeYOffset(int y) {
+	public int rearrangeYOffset(int y) {
 		if ((y - offset.y) < 0) {
 			int offsetDif = offset.y - y;
 			offset.y = y;
@@ -126,33 +119,33 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 	private void shiftYRight(int shiftAmount) {
 		for (; shiftAmount > 0; shiftAmount--) {
 			LinkedList<MapTile> line = new LinkedList<>();
-			for(int i = 0; i < getWidth(); i++ ) {
+			for (int i = 0; i < getWidth(); i++) {
 				line.add(new MapTile());
 			}
-			
+
 			LinkedList<LinkedList<MapTile>> temp = new LinkedList<>(this);
-			
+
 			this.clear();
-			
+
 			this.add(line);
-			
+
 			for (LinkedList<MapTile> linkedList : temp) {
 				this.add(linkedList);
 			}
-			
+
 		}
 	}
 
 	private void shiftXRight(int shiftAmount) {
 		for (; shiftAmount > 0; shiftAmount--) {
 			for (LinkedList<MapTile> line : this) {
-				
+
 				LinkedList<MapTile> temp = new LinkedList<>(line);
-				
+
 				line.clear();
-				
+
 				line.add(new MapTile());
-				
+
 				for (MapTile tile : temp) {
 					line.add(tile);
 				}
@@ -277,7 +270,7 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 		int newY = rearrangeYOffset(y);
 		return this.get(newY).get(newX);
 	}
-	
+
 	private MapTile getDirectMapTile(int x, int y, Direction dir) {
 		switch (dir) {
 		case NORTH:
@@ -295,6 +288,42 @@ public class Map extends LinkedList<LinkedList<MapTile>>{
 		}
 
 		return this.get(y).get(x);
+	}
+
+	public boolean hasUnvisitedNeighboring(Point p) {
+		MapTile tile = this.get(p.x).get(p.y);
+
+		if (!tile.wallNorth) {
+			try {
+				return !getDirectMapTile(p.x, p.y, Direction.NORTH).visited;
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+
+		if (!tile.wallEast) {
+			try {
+				return !getDirectMapTile(p.x, p.y, Direction.EAST).visited;
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+		if (!tile.wallSouth) {
+			try {
+				return !getDirectMapTile(p.x, p.y, Direction.SOUTH).visited;
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+		if (!tile.wallWest) {
+			try {
+				return !getDirectMapTile(p.x, p.y, Direction.WEST).visited;
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+
+		return false;
 	}
 
 }

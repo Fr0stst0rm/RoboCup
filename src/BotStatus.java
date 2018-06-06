@@ -3,7 +3,8 @@ public class BotStatus {
 	
 	public static Direction currentDir = Direction.NORTH;
 	
-	public static int blackTile = 37;
+	public static int blackTile = 38;
+	public static int pathTile = 50;
 	
 	public static int victimsFound = 0;
 	public static int victimsToFind = 20;
@@ -15,6 +16,20 @@ public class BotStatus {
 	public static boolean mapping = true;
 	
 	public static Path pathToStart = new Path(0,0);
+	
+	public static Direction convertRelativeDirection(RelativeDirection relDir) {
+		switch (relDir) {
+		case FORWARD:
+			return currentDir;
+		case LEFT:
+			return getLeft();
+		case RIGHT:
+			return getRight();
+		case BACK:
+			return getBack();
+		}
+		return currentDir;
+	}
 	
 	public static Direction getLeft() {
 		switch (currentDir) {

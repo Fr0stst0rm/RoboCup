@@ -27,6 +27,10 @@ public class Point {
 	public boolean equals(Point p){
 		return p.getX() == this.x && p.getY() == this.y;
 	}
+
+	public Point add(Point offset) {
+		return new Point(x + offset.x, y + offset.y);
+	}
 	
 	
 	
