@@ -1,8 +1,8 @@
 
 public class Point {
 
-	public int x,y;
-	
+	public int x, y;
+
 	public Point(int y, int x) {
 		this.x = x;
 		this.y = y;
@@ -24,22 +24,27 @@ public class Point {
 		this.y = y;
 	}
 
-	public boolean equals(Point p){
+	public boolean equals(Point p) {
 		return p.getX() == this.x && p.getY() == this.y;
 	}
 
 	public Point add(Point offset) {
 		return new Point(x + offset.x, y + offset.y);
 	}
-	
+
+	@Override
+	public String toString() {
+		return "(" + x + "," + y + ")";
+	}
+
 	@Override
 	public boolean equals(Object aOther) {
-		if(aOther instanceof Point) {
-			if((x ==((Point)aOther).x) && (y ==((Point)aOther).y)) {
+		if (aOther instanceof Point) {
+			if ((x == ((Point) aOther).x) && (y == ((Point) aOther).y)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 }

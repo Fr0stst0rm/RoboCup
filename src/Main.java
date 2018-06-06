@@ -14,10 +14,15 @@ import lejos.nxt.SensorPort;
 public class Main {
 
 	public static void main(String[] args) {
-		
-		System.setOut(new PrintStream(new SysLogStream()));
-		System.setErr(new PrintStream(new SysLogStream()));
-		
+
+		//		if(Tools.logFile.exists()) {
+		//			Tools.logFile.delete();
+		//		}
+
+		//Zu wenig memory :(
+		//		System.setOut(new PrintStream(new SysLogStream()));
+		//		System.setErr(new PrintStream(new SysLogStream()));
+
 		new Main();
 	}
 
@@ -41,7 +46,7 @@ public class Main {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				e.printStackTrace();
 				e.printStackTrace();
 			}
 		}
@@ -55,110 +60,161 @@ public class Main {
 
 		BotStatus.mazeMap.addTile(0, 0, tile);
 
+		BotUtility.moveToNextTile();
+
 		RelativeDirection lastRelativeDirection = RelativeDirection.FORWARD;
 
 		while (BotStatus.victimsFound < BotStatus.victimsToFind) {
-			Direction nexDir = BotStatus.convertRelativeDirection(lastRelativeDirection);
-			
-			//TODO Turn bot
-			
-			BotUtility.moveToNextTile();
-			
+
 			tile = BotUtility.scanWalls();
-			
+
 			BotStatus.mazeMap.addTile(BotStatus.currentPos, tile);
-			
-			if(tile.isDeadEnd()) {
-				
-				//Find last unchecked crossroad
-				Point start = BotStatus.currentPos;
-				Point stop = null;
-				do{
-					stop = BotStatus.pathToStart.pop();
-				} while(!BotStatus.mazeMap.hasUnvisitedNeighboring(stop));
-				
-				if(stop.equals(new Point(0, 0))) {
-					LCD.drawString("Something went wrong!", 0, 0);
-					LCD.drawString("Bot is back", 0, 1);
-					LCD.drawString("on start tile", 0, 2);
-					Button.waitForAnyPress();
-					return;
-				}
-				
-				Point correctedStart = new Point( BotStatus.mazeMap.rearrangeXOffset(stop.x),BotStatus.mazeMap.rearrangeYOffset(stop.y));
-				Point correctedStop  = new Point( BotStatus.mazeMap.rearrangeXOffset(start.x),BotStatus.mazeMap.rearrangeYOffset(start.y));
-				
-				//A*
-				ASternDerDeinenNamenTraegt aStern = new ASternDerDeinenNamenTraegt(correctedStart,correctedStop);
-				Path pathToCrossRoad = aStern.getPath();
-				
-				while(!pathToCrossRoad.empty()) {
-					Direction nextDir = null;
-					Point nextPoint = pathToCrossRoad.pop().add(BotStatus.mazeMap.offset);
-					
-					Point testPoint = BotStatus.currentPos;
-					
-					testPoint.x ++;
-					
-					if(testPoint.equals(nextPoint)) {
-						nexDir = Direction.EAST;
+
+			if (tile.isDeadEnd()) {
+				handleDeadEnd();
+			} else {
+
+				boolean moved = false;
+				do {
+					Direction nextDir = BotStatus.convertRelativeDirection(lastRelativeDirection);
+					System.out.println("Next direction: " + nextDir.name());
+
+					//Check if nextDir is a valid tile && not visited
+					boolean tileIsValide = false;
+					try {
+						tileIsValide = !BotStatus.mazeMap.getMapTile(BotStatus.currentPos, nextDir).visited;
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-					
-					testPoint = BotStatus.currentPos;
-					
-					testPoint.x --;
-					
-					if(testPoint.equals(nextPoint)) {
-						nexDir = Direction.WEST;
-					}
-					
-					testPoint = BotStatus.currentPos;
-					
-					testPoint.y ++;
-					
-					if(testPoint.equals(nextPoint)) {
-						nexDir = Direction.EAST;
-					}
-					
-					testPoint = BotStatus.currentPos;
-					
-					testPoint.y --;
-					
-					if(testPoint.equals(nextPoint)) {
-						nexDir = Direction.EAST;
-					}
-					
-					int turns = BotStatus.calculateTurnesToDir(nexDir);
-					
-					System.out.println("Current dir " + BotStatus.currentDir.name());
-					System.out.println("Desired dir " + nexDir.name());
-					System.out.println("Turns: " + turns);
-					
-					if(turns > 0) {
-						for(;turns > 0; turns --) {
-							BotUtility.rotate90DegreesRight();
-						}
-					} else if(turns < 0) {
-						turns = -1 * turns;
-						for(;turns > 0; turns --) {
+
+					if (tileIsValide) {
+						//turn if lastRelativeDirection is not forward
+						System.out.println("Turning bot " + lastRelativeDirection.name());
+						switch (lastRelativeDirection) {
+						case LEFT:
 							BotUtility.rotate90DegreesLeft();
+							break;
+						case RIGHT:
+							BotUtility.rotate90DegreesRight();
+							break;
+						case BACK:
+							BotUtility.rotate90DegreesRight();
+							BotUtility.rotate90DegreesRight();
+							break;
+						}
+						System.out.println("Moving forward");
+						BotUtility.moveToNextTile();
+						moved = true;
+					} else {
+						switch (lastRelativeDirection) {
+						case LEFT:
+							lastRelativeDirection = RelativeDirection.FORWARD;
+							break;
+						case RIGHT:
+							lastRelativeDirection = RelativeDirection.LEFT;
+							break;
+						case FORWARD:
+							lastRelativeDirection = RelativeDirection.RIGHT;
+							break;
 						}
 					}
-					
-					BotUtility.moveToNextTile();
-					
-				}
-				
- 				//Get next relative Dir
-				BotStatus.mazeMap.getMapTile(BotStatus.currentPos);
+				} while (moved);
+
 			}
-			
-			Button.waitForAnyPress();
-			
+
 		}
 
+		Button.waitForAnyPress();
+
 	}
-	
+
+	public void handleDeadEnd() {
+
+		System.out.println("Dead end found!");
+
+		//Find last unchecked crossroad
+		Point start = BotStatus.currentPos;
+		Point stop = null;
+		do {
+			stop = BotStatus.pathToStart.pop();
+		} while (!BotStatus.mazeMap.hasUnvisitedNeighboring(stop));
+
+		if (stop.equals(new Point(0, 0))) {
+			System.out.println("Something went wrong!");
+			System.out.println("Bot is back on start tile!");
+			Button.waitForAnyPress();
+			return;
+		}
+
+		Point correctedStart = new Point(BotStatus.mazeMap.rearrangeXOffset(stop.x), BotStatus.mazeMap.rearrangeYOffset(stop.y));
+		Point correctedStop = new Point(BotStatus.mazeMap.rearrangeXOffset(start.x), BotStatus.mazeMap.rearrangeYOffset(start.y));
+
+		System.out.println("Starting A*");
+
+		//A*
+		ASternDerDeinenNamenTraegt aStern = new ASternDerDeinenNamenTraegt(correctedStart, correctedStop);
+		Path pathToCrossRoad = aStern.getPath();
+
+		System.out.println("Best path found: " + pathToCrossRoad);
+
+		while (!pathToCrossRoad.empty()) {
+			Direction nextDir = null;
+			Point nextPoint = pathToCrossRoad.pop().add(BotStatus.mazeMap.offset);
+
+			Point testPoint = BotStatus.currentPos;
+
+			testPoint.x++;
+
+			if (testPoint.equals(nextPoint)) {
+				nextDir = Direction.EAST;
+			}
+
+			testPoint = BotStatus.currentPos;
+
+			testPoint.x--;
+
+			if (testPoint.equals(nextPoint)) {
+				nextDir = Direction.WEST;
+			}
+
+			testPoint = BotStatus.currentPos;
+
+			testPoint.y++;
+
+			if (testPoint.equals(nextPoint)) {
+				nextDir = Direction.EAST;
+			}
+
+			testPoint = BotStatus.currentPos;
+
+			testPoint.y--;
+
+			if (testPoint.equals(nextPoint)) {
+				nextDir = Direction.EAST;
+			}
+
+			int turns = BotStatus.calculateTurnesToDir(nextDir);
+
+			System.out.println("Current dir " + BotStatus.currentDir.name());
+			System.out.println("Desired dir " + nextDir.name());
+			System.out.println("Turns: " + turns);
+
+			if (turns > 0) {
+				for (; turns > 0; turns--) {
+					BotUtility.rotate90DegreesRight();
+				}
+			} else if (turns < 0) {
+				turns = -1 * turns;
+				for (; turns > 0; turns--) {
+					BotUtility.rotate90DegreesLeft();
+				}
+			}
+
+			BotUtility.moveToNextTile();
+
+		}
+	}
+
 	public void scanTileColors() {
 		LCD.drawString("Scann path", 0, 0);
 		Button.waitForAnyPress();
@@ -167,13 +223,13 @@ public class Main {
 		light.setFloodlight(true);
 
 		int path = light.getLightValue();
-		
+
 		LCD.drawString("Scann checkpoint", 0, 1);
 		Button.waitForAnyPress();
 
 		light = new LightSensor(SensorPort.S2);
 		light.setFloodlight(true);
-		
+
 		int checkpoint = light.getLightValue();
 
 		LCD.drawString("Scann pit", 0, 2);
@@ -183,9 +239,9 @@ public class Main {
 		light.setFloodlight(true);
 
 		int pit = light.getLightValue();
-		
-		BotStatus.blackTile = (pit + checkpoint) / 2 ;
-		BotStatus.pathTile = (path + checkpoint) / 2 ;
+
+		BotStatus.blackTile = (pit + checkpoint) / 2;
+		BotStatus.pathTile = (path + checkpoint) / 2;
 	}
 
 	private void buildMap() {
@@ -456,10 +512,8 @@ public class Main {
 
 			bfw.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

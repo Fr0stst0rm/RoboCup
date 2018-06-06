@@ -34,6 +34,10 @@ public class Tools {
 			if(!logFile.exists()) {
 				logFile.createNewFile();
 			}
+//			
+//			File temp = new File("temp");
+			
+			
 			
 			BufferedReader bfr = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)) );
 			
