@@ -1,4 +1,5 @@
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,13 +26,13 @@ public class Main {
 
 		//Simulation
 		//BaseMap.initBaseMap();
-
+		
 		new Main();
 	}
 
 	public Main() {
-
-		LCD.drawString("V 0.45 Simulation", 0, 0);
+		
+		LCD.drawString("V 0.40 Simulation", 0, 0);
 		Button.waitForAnyPress();
 
 		scanTileColors();
@@ -71,7 +72,7 @@ public class Main {
 
 		RelativeDirection lastRelativeDirection = RelativeDirection.FORWARD;
 
-		while (BotStatus.victimsFound < BotStatus.victimsToFind) {
+		while (!BotStatus.mappingEnded && (BotStatus.victimsFound < BotStatus.victimsToFind)) {
 
 			System.out.println("Scanning current tile:");
 
@@ -156,9 +157,8 @@ public class Main {
 			}
 		}
 
-		//System.out.println(BotStatus.mazeMap);
+		System.out.println(BotStatus.mazeMap);
 		Button.waitForAnyPress();
-		printMapToFile(BotStatus.mazeMap);
 
 	}
 
@@ -171,13 +171,12 @@ public class Main {
 		Point stop = null;
 		do {
 			stop = BotStatus.pathToStart.pop();
-		} while (!BotStatus.mazeMap.hasUnvisitedNeighboring(stop));
+		} while (!BotStatus.pathToStart.empty() && !BotStatus.mazeMap.hasUnvisitedNeighboring(stop));
 
 		if (stop.equals(new Point(0, 0))) {
-			System.out.println("Something went wrong!");
-			System.out.println("Bot is back on start tile!");
-			Button.waitForAnyPress();
-			return;
+			System.out.println("Maze completely mapped!");
+			System.out.println("Returning to start tile.");
+			BotStatus.mappingEnded = true;
 		}
 
 		Point correctedStart = new Point(BotStatus.mazeMap.rearrangeXOffset(start.x), BotStatus.mazeMap.rearrangeYOffset(start.y));

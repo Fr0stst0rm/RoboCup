@@ -18,6 +18,7 @@ public class BotStatus {
 	public static boolean mapping = true;
 	
 	public static Path pathToStart = new Path(0,0);
+	public static boolean mappingEnded = false;
 	
 	public static Direction convertRelativeDirection(RelativeDirection relDir) {
 		switch (relDir) {
@@ -127,10 +128,10 @@ public class BotStatus {
 				turns = 2;
 				break;
 			case SOUTH:
-				turns = 1;
+				turns = -1;
 				break;
 			case NORTH:
-				turns = -1;
+				turns = 1;
 				break;
 			}
 			break;

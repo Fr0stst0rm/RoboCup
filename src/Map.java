@@ -56,7 +56,7 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		}
 
 		try {
-			if (getDirectMapTile(newX, newY, Direction.NORTH).wallNorth == true) {
+			if (getDirectMapTile(newX, newY, Direction.SOUTH).wallNorth == true) {
 				tile.wallSouth = true;
 			} else if (tile.wallSouth) {
 				getDirectMapTile(newX, newY, Direction.SOUTH).wallNorth = true;
@@ -66,7 +66,7 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		}
 
 		try {
-			if (getDirectMapTile(newX, newY, Direction.NORTH).wallEast == true) {
+			if (getDirectMapTile(newX, newY, Direction.WEST).wallEast == true) {
 				tile.wallWest = true;
 			} else if (tile.wallWest) {
 				getDirectMapTile(newX, newY, Direction.WEST).wallEast = true;
@@ -244,8 +244,8 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		return new Point(newX, newY);
 	}
 
-	public void addTile(Point coordinates, MapTile chasm) {
-		addTile(coordinates.x, coordinates.y, chasm);
+	public void addTile(Point coordinates, MapTile tile) {
+		addTile(coordinates.x, coordinates.y, tile);
 	}
 
 	public MapTile getMapTile(Point p, Direction dir) {
