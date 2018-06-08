@@ -1,6 +1,6 @@
+
+
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class ASternDerDeinenNamenTraegt {
 		for(int y = 0; y < map.size(); y++){
 			LinkedList<MapTile> YMap = map.get(y);
 			for(int x = 0; x < YMap.size(); x++){
-				ANode anode = new ANode(new Point(y, x), YMap.get(x));
+				ANode anode = new ANode(new Point(x, y), YMap.get(x));
 				if(anode.passable()) {
 					anode.setManhattenDistanceToGoal(calculateManhattenDistance(anode.getPoint()));
 				}
@@ -58,6 +58,19 @@ public class ASternDerDeinenNamenTraegt {
 		setUpNode(currENode);
 		setUpNode(currSNode);
 		setUpNode(currWNode);
+		
+		if(currNNode!=null){
+			checkNode(currNNode);
+		}
+		if(currSNode!=null){
+			checkNode(currSNode);
+		}
+		if(currWNode!=null){
+			checkNode(currWNode);
+		}
+		if(currENode!=null){
+			checkNode(currENode);
+		}
 
 		//while true
 		while(searching){

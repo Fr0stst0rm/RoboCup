@@ -1,4 +1,5 @@
 
+
 public class ANode {
 	
 	private ANode parent;

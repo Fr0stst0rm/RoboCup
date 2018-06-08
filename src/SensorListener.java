@@ -1,4 +1,5 @@
 
+
 public interface SensorListener {
 	
 	public void lightSensorEvent();

@@ -1,4 +1,5 @@
-import lejos.nxt.Button;
+
+
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
@@ -13,6 +14,20 @@ public class BotUtility {
 
 	public static void rotateSensor90DegreesRight() {
 		try {
+			switch (BotStatus.lookDir) {
+			case NORTH:
+				BotStatus.lookDir = Direction.EAST;
+				break;
+			case WEST:
+				BotStatus.lookDir = Direction.NORTH;
+				break;
+			case EAST:
+				BotStatus.lookDir = Direction.SOUTH;
+				break;
+			case SOUTH:
+				BotStatus.lookDir = Direction.WEST;
+				break;
+			}
 			Motor.B.setSpeed(300);
 			int rot = 655; // Degree
 			Motor.B.rotate(rot);
@@ -23,6 +38,20 @@ public class BotUtility {
 
 	public static void rotateSensor90DegreesLeft() {
 		try {
+			switch (BotStatus.lookDir) {
+			case NORTH:
+				BotStatus.lookDir = Direction.WEST;
+				break;
+			case WEST:
+				BotStatus.lookDir = Direction.SOUTH;
+				break;
+			case EAST:
+				BotStatus.lookDir = Direction.NORTH;
+				break;
+			case SOUTH:
+				BotStatus.lookDir = Direction.EAST;
+				break;
+			}
 			Motor.B.setSpeed(300);
 			int rot = -655; // Degree
 			Motor.B.rotate(rot);
@@ -44,29 +73,28 @@ public class BotUtility {
 	}
 
 	public static void handleVictim() {
-		Sound.playTone(500,5000);	
+		Sound.playTone(500, 5000);
 	}
-	
+
 	public static boolean scanForVictims() {
 		DThermalIR thermal;
-		   
+
 		thermal = new DThermalIR(SensorPort.S4);
 		//thermal.setEmissivity(0.53f);
 		System.out.println(thermal.readEmissivity());
 		//Button.ENTER.waitForPressAndRelease();
-		
-		
+
 		float obj = thermal.readObject();
 		float amb = thermal.readAmbient();
 		LCD.clear();
-		LCD.drawString("ObjTemp=" + (int)obj, 1, 1);
-		LCD.drawString("AmbTemp=" + (int)amb, 1, 2);
-		if(obj > amb + 15) {
+		LCD.drawString("ObjTemp=" + (int) obj, 1, 1);
+		LCD.drawString("AmbTemp=" + (int) amb, 1, 2);
+		if (obj > amb + 15) {
 			BotStatus.victimsFound++;
-			return true;		
+			return true;
 		}
 		return false;
-		
+
 	}
 
 	public static void rotate90DegreesLeft() {
@@ -92,6 +120,21 @@ public class BotUtility {
 			BotStatus.currentDir = Direction.EAST;
 			break;
 		}
+		
+		switch (BotStatus.lookDir) {
+		case NORTH:
+			BotStatus.lookDir = Direction.WEST;
+			break;
+		case WEST:
+			BotStatus.lookDir = Direction.SOUTH;
+			break;
+		case EAST:
+			BotStatus.lookDir = Direction.NORTH;
+			break;
+		case SOUTH:
+			BotStatus.lookDir = Direction.EAST;
+			break;
+		}
 	}
 
 	public static void rotate90DegreesRight() {
@@ -115,6 +158,21 @@ public class BotUtility {
 			break;
 		case SOUTH:
 			BotStatus.currentDir = Direction.WEST;
+			break;
+		}
+	
+		switch (BotStatus.lookDir) {
+		case NORTH:
+			BotStatus.lookDir = Direction.EAST;
+			break;
+		case WEST:
+			BotStatus.lookDir = Direction.NORTH;
+			break;
+		case EAST:
+			BotStatus.lookDir = Direction.SOUTH;
+			break;
+		case SOUTH:
+			BotStatus.lookDir = Direction.WEST;
 			break;
 		}
 	}
@@ -161,7 +219,7 @@ public class BotUtility {
 							tile.wallSouth = true;
 							break;
 						}
-						if(scanForVictims()){
+						if (scanForVictims()) {
 							handleVictim();
 						}
 						next = true;
@@ -202,7 +260,7 @@ public class BotUtility {
 							tile.wallWest = true;
 							break;
 						}
-						if(scanForVictims()){
+						if (scanForVictims()) {
 							handleVictim();
 						}
 						next = true;
@@ -245,7 +303,7 @@ public class BotUtility {
 							tile.wallEast = true;
 							break;
 						}
-						if(scanForVictims()){
+						if (scanForVictims()) {
 							handleVictim();
 						}
 						next = true;
@@ -281,6 +339,7 @@ public class BotUtility {
 			BotStatus.currentPos.y--;
 			break;
 		}
+		BotStatus.pathToStart.push(new Point(BotStatus.currentPos));
 	}
 
 	public static void moveHalfTileBackwards() {

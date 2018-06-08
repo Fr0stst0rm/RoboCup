@@ -1,4 +1,5 @@
 
+
 public class MapTile {
 
 	public boolean wallNorth = false;
@@ -143,11 +144,25 @@ public class MapTile {
 			wallCount ++;
 		}
 		
-		if(wallEast) {
+		if(wallWest) {
 			wallCount ++;
 		}
 		
 		return (wallCount >= 3);
+	}
+
+	public boolean checkWall(Direction dir) {
+		switch (dir) {
+		case NORTH:
+			return wallNorth;
+		case EAST:
+			return wallEast;
+		case SOUTH:
+			return wallSouth;
+		case WEST:
+			return wallWest;
+		}
+		return false;
 	}
 
 }

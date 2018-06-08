@@ -1,7 +1,9 @@
 
+
 public class BotStatus {
 	
 	public static Direction currentDir = Direction.NORTH;
+	public static Direction lookDir = Direction.NORTH;
 	
 	public static int blackTile = 38;
 	public static int pathTile = 50;

@@ -1,3 +1,5 @@
+
+
 import java.util.LinkedList;
 
 public class Map extends LinkedList<LinkedList<MapTile>> {
@@ -246,8 +248,8 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		addTile(coordinates.x, coordinates.y, chasm);
 	}
 
-	public MapTile getMapTile(Point p, Direction north) {
-		return getMapTile(p.x, p.y, north);
+	public MapTile getMapTile(Point p, Direction dir) {
+		return getMapTile(p.x, p.y, dir);
 	}
 
 	public MapTile getMapTile(int x, int y, Direction dir) {
@@ -291,35 +293,37 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 	}
 
 	public boolean hasUnvisitedNeighboring(Point p) {
-		MapTile tile = this.get(p.x).get(p.y);
+		int x = rearrangeXOffset(p.x);
+		int y = rearrangeYOffset(p.y);
+		MapTile tile = this.get(y).get(x);
 
 		if (!tile.wallNorth) {
 			try {
-				return !getDirectMapTile(p.x, p.y, Direction.NORTH).visited;
+				if (!getDirectMapTile(x, y, Direction.NORTH).visited) return true;
 			} catch (Exception e) {
-				// TODO: handle exception
+				return true;
 			}
 		}
 
 		if (!tile.wallEast) {
 			try {
-				return !getDirectMapTile(p.x, p.y, Direction.EAST).visited;
+				if (!getDirectMapTile(x, y, Direction.EAST).visited) return true;
 			} catch (Exception e) {
-				// TODO: handle exception
+				return true;
 			}
 		}
 		if (!tile.wallSouth) {
 			try {
-				return !getDirectMapTile(p.x, p.y, Direction.SOUTH).visited;
+				if (!getDirectMapTile(x, y, Direction.SOUTH).visited) return true;
 			} catch (Exception e) {
-				// TODO: handle exception
+				return true;
 			}
 		}
 		if (!tile.wallWest) {
 			try {
-				return !getDirectMapTile(p.x, p.y, Direction.WEST).visited;
+				if (!getDirectMapTile(x, y, Direction.WEST).visited) return true;
 			} catch (Exception e) {
-				// TODO: handle exception
+				return true;
 			}
 		}
 

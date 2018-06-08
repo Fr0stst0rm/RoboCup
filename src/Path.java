@@ -1,3 +1,4 @@
+
 import java.util.Stack;
 
 public class Path extends Stack<Point> {
@@ -7,7 +8,7 @@ public class Path extends Stack<Point> {
 	}
 	
 	public Path(int x, int y) {
-		this(new Point(y, x));
+		this(new Point(x, y));
 	}
 
 	public boolean hasAlternativePath(){

@@ -1,4 +1,5 @@
 
+
 public class RightHandGapFillerMapThing {
 	
 	private Map map;
