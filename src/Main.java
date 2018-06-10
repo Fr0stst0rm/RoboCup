@@ -1,47 +1,56 @@
 
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.util.Arrays;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
+import lejos.nxt.UltrasonicSensor;
+import lejos.robotics.objectdetection.RangeFeatureDetector;
 
 public class Main {
 
 	public static void main(String[] args) {
 
-		//		if(Tools.logFile.exists()) {
-		//			Tools.logFile.delete();
-		//		}
+		if (Tools.logFile.exists()) {
+			Tools.logFile.delete();
+		}
 
 		//Zu wenig memory :(
-		//		System.setOut(new PrintStream(new SysLogStream()));
-		//		System.setErr(new PrintStream(new SysLogStream()));
+		System.setOut(new PrintStream(new SysLogStream()));
+		System.setErr(new PrintStream(new SysLogStream()));
 
 		//Simulation
 		//BaseMap.initBaseMap();
-		
+
+
 		new Main();
 	}
 
 	public Main() {
-		
-		LCD.drawString("V 0.40 Simulation", 0, 0);
+
+		String version = "V 0.63";
+
+		LCD.drawString(version, 0, 0);
+		System.out.println(version);
+
 		Button.waitForAnyPress();
 
 		scanTileColors();
 
 		//Dunkel = kleiner, Heller = größer
 		LCD.clear();
-		LCD.drawString("Black is < " + BotStatus.blackTile, 0, 0);
+		LCD.drawString("Black is <= " + BotStatus.blackTile, 0, 0);
 		//LCD.drawString("Checkpoint is < " + BotStatus.blackTile, 0, 1);
-		LCD.drawString("Path is > " + BotStatus.pathTile, 0, 1);
+		LCD.drawString("Path is >= " + BotStatus.pathTile, 0, 1);
 		LCD.drawString("Press button to\nstart ...", 0, 4);
 		Button.waitForAnyPress();
 
@@ -53,16 +62,18 @@ public class Main {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-				e.printStackTrace();
 			}
 		}
 
+		
 		MapTile tile = new MapTile();
 		tile.isStart = true;
 		tile.wallEast = true;
 		tile.wallSouth = true;
 		tile.wallWest = true;
 		tile.visited = true;
+
+		System.out.println("Adding tile to map");
 
 		BotStatus.mazeMap.addTile(0, 0, tile);
 
@@ -74,32 +85,54 @@ public class Main {
 
 		while (!BotStatus.mappingEnded && (BotStatus.victimsFound < BotStatus.victimsToFind)) {
 
+			LCD.clear();
+
 			System.out.println("Scanning current tile:");
 
 			boolean scan = false;
 
 			try {
-				if (!BotStatus.mazeMap.getMapTile(BotStatus.currentPos).visited) scan = true;
-			} catch (Exception e) {
+				if (!BotStatus.mazeMap.getMapTile(BotStatus.currentPos).visited) {
+					scan = true;
+					System.out.println("Tile already scanned");
+				}
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
 				scan = true;
 			}
 
 			if (scan) {
-				tile = BotUtility.scanWalls();
-
-				BotStatus.mazeMap.addTile(BotStatus.currentPos, tile);
+				try {
+					tile = BotUtility.scanWalls();
+				} catch (IllegalStateException e) {
+					System.out.println("Possible error 1");
+				}
+				System.out.println("Adding new tile");
+				try {
+					BotStatus.mazeMap.addTile(BotStatus.currentPos, tile);
+				} catch (IllegalStateException e) {
+					System.out.println("Possible error 2");
+				}
+				System.out.println("New tile added.");
 			}
 
+			System.out.println();
 			System.out.println("Current pos: " + BotStatus.currentPos);
-			System.out.println(BotStatus.mazeMap.getMapTile(BotStatus.currentPos));
-
+			System.out.println();
+			try {
+				System.out.println(BotStatus.mazeMap.getMapTile(BotStatus.currentPos));
+			} catch (IllegalStateException e) {
+				System.out.println("Possible error 3");
+			}
 			if (!BotStatus.mazeMap.hasUnvisitedNeighboring(BotStatus.currentPos)) {
 				handleDeadEnd();
 			} else {
 
+				System.out.println("No dead end");
+
 				boolean moved = false;
 				tile = BotStatus.mazeMap.getMapTile(BotStatus.currentPos);
 				Direction currentDir = BotStatus.convertRelativeDirection(lastRelativeDirection);
+				System.out.println("Current direction: " + BotStatus.currentDir);
 				do {
 					Direction nextDir = BotStatus.convertRelativeDirection(lastRelativeDirection);
 					System.out.println("Next direction: " + nextDir.name());
@@ -110,7 +143,7 @@ public class Main {
 						tileIsValide = true;
 						try {
 							tileIsValide = !BotStatus.mazeMap.getMapTile(BotStatus.currentPos, nextDir).visited;
-						} catch (Exception e) {
+						} catch (IndexOutOfBoundsException | NullPointerException e) {
 							//e.printStackTrace();
 						}
 					}
@@ -118,6 +151,7 @@ public class Main {
 					System.out.println("Next tile valide: " + tileIsValide);
 
 					if (tileIsValide) {
+						LCD.drawString("Next dir: " + BotStatus.currentDir.name(), 0, 0);
 						//turn if lastRelativeDirection is not forward
 						System.out.println("Turning bot " + lastRelativeDirection.name());
 						switch (lastRelativeDirection) {
@@ -132,6 +166,7 @@ public class Main {
 							BotUtility.rotate90DegreesRight();
 							break;
 						}
+
 						System.out.println("Moving forward");
 						BotUtility.moveToNextTile();
 						moved = true;
@@ -148,6 +183,7 @@ public class Main {
 							break;
 						}
 						if (currentDir.equals(BotStatus.convertRelativeDirection(lastRelativeDirection))) {
+							System.out.println("The bot should never reach this point ==> endless loop");
 							//							handleDeadEnd();
 							moved = true;
 						}
@@ -155,10 +191,14 @@ public class Main {
 				} while (!moved);
 
 			}
+			if(Button.waitForAnyPress(450) == Button.ID_ESCAPE) {
+				BotStatus.mappingEnded = true;
+			}
 		}
 
 		System.out.println(BotStatus.mazeMap);
 		Button.waitForAnyPress();
+		printMapToFile(BotStatus.mazeMap);
 
 	}
 
@@ -252,13 +292,16 @@ public class Main {
 	}
 
 	public void scanTileColors() {
-		LCD.drawString("Scann path", 0, 0);
-		Button.waitForAnyPress();
 
 		LightSensor light = new LightSensor(SensorPort.S2);
 		light.setFloodlight(true);
 
+		LCD.drawString("Scann path", 0, 0);
+		Button.waitForAnyPress();
+
 		int path = light.getLightValue();
+
+		System.out.println("Path: " + path);
 
 		LCD.drawString("Scann checkpoint", 0, 1);
 		Button.waitForAnyPress();
@@ -268,6 +311,8 @@ public class Main {
 
 		int checkpoint = light.getLightValue();
 
+		System.out.println("Ceckpoint: " + checkpoint);
+
 		LCD.drawString("Scann pit", 0, 2);
 		Button.waitForAnyPress();
 
@@ -275,9 +320,18 @@ public class Main {
 		light.setFloodlight(true);
 
 		int pit = light.getLightValue();
+		System.out.println("Pit: " + pit);
 
 		BotStatus.blackTile = (pit + checkpoint) / 2;
 		BotStatus.pathTile = (path + checkpoint) / 2;
+
+		System.out.println("Path >= " + BotStatus.pathTile);
+		System.out.println("Checkpoint > " + BotStatus.blackTile + " and < " + BotStatus.pathTile);
+		System.out.println("Pit <= " + BotStatus.blackTile);
+
+		light.setFloodlight(false);
+
+		SensorPort.S2.i2cDisable();
 	}
 
 	public void printMapToFile(Map map) {

@@ -14,35 +14,45 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		int newX = rearrangeXOffset(x);
 		int newY = rearrangeYOffset(y);
 
+		System.out.println("X: "+x+" => "+newX);
+		System.out.println("Y: "+y+" => "+newY);
+		
 		while (this.size() <= newY) {
+			System.out.println("Adding new row to map.");
 			this.add(new LinkedList<MapTile>());
 		}
 		while (this.get(newY).size() < newX) {
+			System.out.println("Adding mew column to map.");
 			this.get(newY).add(new MapTile());
 		}
 
+		System.out.println("Adding tile");
 		if (newX == this.get(newY).size()) {
 			this.get(newY).add(tile);
 		} else {
 			this.get(newY).set(newX, tile);
 		}
-
+		System.out.println("Tile added");
+		
 		for (LinkedList<MapTile> line : this) {
 			while (line.size() < this.getWidth()) {
+				System.out.println("Filling empty map tiles");
 				line.add(new MapTile());
 			}
 		}
 
 		//Add walls to connected tiles
-
+		System.out.println("Adding walls to connected tiles");
 		try {
 			if (getDirectMapTile(newX, newY, Direction.NORTH).wallSouth == true) {
 				tile.wallNorth = true;
 			} else if (tile.wallNorth) {
 				getDirectMapTile(newX, newY, Direction.NORTH).wallSouth = true;
+				System.out.println("Tile found in direction NORTH and wall added.");
 			}
 		} catch (IndexOutOfBoundsException e) {
-
+			//System.out.println("No connected tile in direction: NORTH");
+			//e.printStackTrace();
 		}
 
 		try {
@@ -50,9 +60,11 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 				tile.wallEast = true;
 			} else if (tile.wallEast) {
 				getDirectMapTile(newX, newY, Direction.EAST).wallWest = true;
+				System.out.println("Tile found in direction EAST and wall added.");
 			}
 		} catch (IndexOutOfBoundsException e) {
-
+			//System.out.println("No connected tile in direction: EAST");
+			//e.printStackTrace();
 		}
 
 		try {
@@ -60,9 +72,11 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 				tile.wallSouth = true;
 			} else if (tile.wallSouth) {
 				getDirectMapTile(newX, newY, Direction.SOUTH).wallNorth = true;
+				System.out.println("Tile found in direction SOUTH and wall added.");
 			}
 		} catch (IndexOutOfBoundsException e) {
-
+			//System.out.println("No connected tile in direction: SOUTH");
+			//e.printStackTrace();
 		}
 
 		try {
@@ -70,9 +84,11 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 				tile.wallWest = true;
 			} else if (tile.wallWest) {
 				getDirectMapTile(newX, newY, Direction.WEST).wallEast = true;
+				System.out.println("Tile found in direction WEST and wall added.");
 			}
 		} catch (IndexOutOfBoundsException e) {
-
+			//System.out.println("No connected tile in direction: WEST");
+			//e.printStackTrace();
 		}
 
 	}
@@ -289,6 +305,8 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 			break;
 		}
 
+		//System.out.println("Get "+x+","+y+" size: "+this.getWidth() + ","+this.getHeight());
+		
 		return this.get(y).get(x);
 	}
 
@@ -300,7 +318,8 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		if (!tile.wallNorth) {
 			try {
 				if (!getDirectMapTile(x, y, Direction.NORTH).visited) return true;
-			} catch (Exception e) {
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
+				//e.printStackTrace();
 				return true;
 			}
 		}
@@ -308,21 +327,24 @@ public class Map extends LinkedList<LinkedList<MapTile>> {
 		if (!tile.wallEast) {
 			try {
 				if (!getDirectMapTile(x, y, Direction.EAST).visited) return true;
-			} catch (Exception e) {
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
+				//e.printStackTrace();
 				return true;
 			}
 		}
 		if (!tile.wallSouth) {
 			try {
 				if (!getDirectMapTile(x, y, Direction.SOUTH).visited) return true;
-			} catch (Exception e) {
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
+				//e.printStackTrace();
 				return true;
 			}
 		}
 		if (!tile.wallWest) {
 			try {
 				if (!getDirectMapTile(x, y, Direction.WEST).visited) return true;
-			} catch (Exception e) {
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
+				//e.printStackTrace();
 				return true;
 			}
 		}

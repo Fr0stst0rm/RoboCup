@@ -29,10 +29,10 @@ public class DThermalIR extends I2CSensor {
 	
 	private byte [] buf = new byte[2];
 	// The I2C slave address of the sensor is 0x0E 
-	//0×00 – This register stores the Ambient Temperature read by the sensor.
-	//0×01 - This register stores the Object Temperature read by the sensor.
-	//0×02 – Write the emissivity, in two bytes, to this register.
-	//0×03 – This register stores the current emissivity value.
+	//0ï¿½00 ï¿½ This register stores the Ambient Temperature read by the sensor.
+	//0ï¿½01 - This register stores the Object Temperature read by the sensor.
+	//0ï¿½02 ï¿½ Write the emissivity, in two bytes, to this register.
+	//0ï¿½03 ï¿½ This register stores the current emissivity value.
 	
 	/**
 	 * Construct a sensor instance that is connected to <code>port</code>.
@@ -57,7 +57,7 @@ public class DThermalIR extends I2CSensor {
 			retval = getData(register, buf, 2);
 			if (++retryCount> I2C_RETRIES) {
 				buf[0]=buf[1]=0;
-//				System.out.println("bad i2c read");
+//				//System.out.println("bad i2c read");
 				break;
 			}
 		}
@@ -120,7 +120,7 @@ public class DThermalIR extends I2CSensor {
 		retval = sendData(REG_SET_EMISSIVITY, buf, 2);
 		if (retval<0) {
 			 // TODO need error notice here?
-//			System.out.println("setemsty err");
+//			//System.out.println("setemsty err");
 		}
 		Delay.msDelay(500);
 	}

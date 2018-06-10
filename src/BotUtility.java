@@ -1,5 +1,4 @@
 
-
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
@@ -32,6 +31,7 @@ public class BotUtility {
 			int rot = 655; // Degree
 			Motor.B.rotate(rot);
 		} catch (IllegalStateException e) {
+			e.printStackTrace();
 			LCD.drawString(e.toString(), 0, 5);
 		}
 	}
@@ -56,6 +56,7 @@ public class BotUtility {
 			int rot = -655; // Degree
 			Motor.B.rotate(rot);
 		} catch (IllegalStateException e) {
+			e.printStackTrace();
 			LCD.drawString(e.toString(), 0, 5);
 		}
 	}
@@ -73,26 +74,45 @@ public class BotUtility {
 	}
 
 	public static void handleVictim() {
+		System.out.println("Beeep!");
 		Sound.playTone(500, 5000);
 	}
 
 	public static boolean scanForVictims() {
+
+		System.out.println("Scanning for victims...");
+
 		DThermalIR thermal;
 
 		thermal = new DThermalIR(SensorPort.S4);
 		//thermal.setEmissivity(0.53f);
-		System.out.println(thermal.readEmissivity());
+		//System.out.println(thermal.readEmissivity());
 		//Button.ENTER.waitForPressAndRelease();
 
-		float obj = thermal.readObject();
-		float amb = thermal.readAmbient();
-		LCD.clear();
-		LCD.drawString("ObjTemp=" + (int) obj, 1, 1);
-		LCD.drawString("AmbTemp=" + (int) amb, 1, 2);
+		Float obj = null;
+		Float amb = null;
+
+		do {
+			try {
+				obj = thermal.readObject();
+				amb = thermal.readAmbient();
+				System.out.println("ObjTemp = " + obj);
+				System.out.println("AmbTemp = " + amb);
+			} catch (Exception e) {
+				System.out.println("Exception while reading temp values!");
+				e.printStackTrace();
+				thermal = new DThermalIR(SensorPort.S4);
+			}
+		} while ((obj == null) && (amb == null));
+
+		SensorPort.S4.i2cDisable();
+
 		if (obj > amb + 15) {
+			System.out.println("Victim found!");
 			BotStatus.victimsFound++;
 			return true;
 		}
+
 		return false;
 
 	}
@@ -120,7 +140,7 @@ public class BotUtility {
 			BotStatus.currentDir = Direction.EAST;
 			break;
 		}
-		
+
 		switch (BotStatus.lookDir) {
 		case NORTH:
 			BotStatus.lookDir = Direction.WEST;
@@ -160,7 +180,7 @@ public class BotUtility {
 			BotStatus.currentDir = Direction.WEST;
 			break;
 		}
-	
+
 		switch (BotStatus.lookDir) {
 		case NORTH:
 			BotStatus.lookDir = Direction.EAST;
@@ -179,31 +199,29 @@ public class BotUtility {
 
 	//TODO add victim detection
 	public static MapTile scanWalls() {
+
 		MapTile tile = new MapTile();
+		try {
+			int wallDistance = 25;
 
-		int wallDistance = 25;
+			UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
 
-		int MAX_DISTANCE = 50; // In centimeters
-		int PERIOD = 250; // In milliseconds
-		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
-		FeatureDetector fd = new RangeFeatureDetector(us, MAX_DISTANCE, PERIOD);
-		Feature result = null;
+			boolean next = true;
 
-		boolean next = true;
+			do {
+				//Gerade
+				System.out.println("Scanning forward");
 
-		do {
-			//Gerade
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-
-			try {
-				result = fd.scan();
-				if (result != null) { //Null = no object in range 
-					double distance = result.getRangeReading().getRange();
-					LCD.drawString("R front: " + distance, 0, 1);
+				try {
+					us.ping();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					double distance = us.getDistance();
+					System.out.println("Wall found. Distance: " + distance);
 					if (distance < wallDistance) {
 						switch (BotStatus.currentDir) {
 						case NORTH:
@@ -224,27 +242,28 @@ public class BotUtility {
 						}
 						next = true;
 					}
+
+				} catch (IllegalStateException e) {
+					//e.printStackTrace();
+					next = false;
 				}
-			} catch (IllegalStateException e) {
-				next = false;
-			}
-		} while (!next);
+			} while (!next);
 
-		//Rechts
-		rotateSensor90DegreesRight();
-		do {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			//Rechts
 
-			try {
-				result = fd.scan();
-				if (result != null) { //Null = no object in range
-					double distance = result.getRangeReading().getRange();
-					LCD.drawString("R right: " + distance, 0, 2);
+			rotateSensor90DegreesRight();
+			do {
+				System.out.println("Scanning right");
+				try {
+					us.ping();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					double distance = us.getDistance();
+					System.out.println("Wall found. Distance: " + distance);
 					if (distance < wallDistance) {
 						switch (BotStatus.currentDir) {
 						case NORTH:
@@ -264,30 +283,30 @@ public class BotUtility {
 							handleVictim();
 						}
 						next = true;
+
 					}
+				} catch (IllegalStateException e) {
+					//e.printStackTrace();
+					next = false;
 				}
-			} catch (IllegalStateException e) {
-				next = false;
-			}
-		} while (!next);
+			} while (!next);
 
-		//Links	
-		rotateSensor90DegreesLeft();
-		rotateSensor90DegreesLeft();
+			//Links	
+			rotateSensor90DegreesLeft();
+			rotateSensor90DegreesLeft();
 
-		do {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-
-			try {
-				result = fd.scan();
-				if (result != null) { //Null = no object in range
-					double distance = result.getRangeReading().getRange();
-					LCD.drawString("R left: " + distance, 0, 3);
+			do {
+				System.out.println("Scanning left");
+				try {
+					us.ping();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					double distance = us.getDistance();
+					System.out.println("Wall found. Distance: " + distance);
 					if (distance < wallDistance) {
 						switch (BotStatus.currentDir) {
 						case NORTH:
@@ -308,18 +327,26 @@ public class BotUtility {
 						}
 						next = true;
 					}
+				} catch (IllegalStateException e) {
+					//e.printStackTrace();
+					next = false;
 				}
-			} catch (IllegalStateException e) {
-				next = false;
-			}
-		} while (!next);
+			} while (!next);
 
-		rotateSensor90DegreesRight();
+			rotateSensor90DegreesRight();
 
-		us.reset();
+			System.out.println("Turning sensor off");
 
-		tile.visited = true;
+			us.off();
 
+			tile.visited = true;
+
+			System.out.println("Scanning walls finished.");
+		} catch (
+
+		IllegalStateException e) {
+			System.out.println("Possibel error 4");
+		}
 		return tile;
 	}
 
@@ -355,6 +382,7 @@ public class BotUtility {
 			Motor.A.rotate((int) (rot - rotCorrection), true); //Korrektur, weil motoren nicht gleich stark sind
 			Motor.C.rotate((int) rot);
 		} catch (IllegalStateException e) {
+			e.printStackTrace();
 			LCD.drawString(e.toString(), 0, 5);
 		}
 

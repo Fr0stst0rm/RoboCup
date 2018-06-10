@@ -26,14 +26,14 @@ public class RightHandGapFillerMapThing {
 		//TODO: if not visited ask sensors for wall
 	    steps++;
 		if(x==0&&y==0) {
-			System.out.println("Found starting point");
+			//System.out.println("Found starting point");
 			return;
 		}
 	    if(isdeadend(x,y)){
 	        mapCopy.getMapTile(x,y).filled = true;
 	    }
 	    if(x >= map.size()|| y >= map.size()){
-	        System.out.println("Out of bounds");
+	        //System.out.println("Out of bounds");
 	        return;
 	    }
 	    //right hand
@@ -79,7 +79,7 @@ public class RightHandGapFillerMapThing {
 	            searchExit();
 	        }
 	    }else{
-	        System.out.println("Welllllllll that was unexpected");
+	        //System.out.println("Welllllllll that was unexpected");
 	    }
 	}
 

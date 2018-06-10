@@ -49,7 +49,7 @@ public class ASternDerDeinenNamenTraegt {
 	}
 	
 	private void calculatePath() {
-		System.out.println("Adding to closed list X: " + startNode.getPoint().getX() + " Y: " + startNode.getPoint().getY() + "\n" );
+		//System.out.println("Adding to closed list X: " + startNode.getPoint().getX() + " Y: " + startNode.getPoint().getY() + "\n" );
 		closedList.add(startNode);
 		currNode = startNode;
 		//set all reachable(do not forget to check for walls) from current node to open list and parent them (g value is parent g value + movement cost) to start node
@@ -79,7 +79,7 @@ public class ASternDerDeinenNamenTraegt {
 			//take the one with least cost from open list and add it to closed list
 			currNode = getNearestNode();
 			closedList.add(currNode);
-			System.out.println("Adding to closed list X: " + currNode.getPoint().getX() + " Y: " + currNode.getPoint().getY() + "\n" );
+			//System.out.println("Adding to closed list X: " + currNode.getPoint().getX() + " Y: " + currNode.getPoint().getY() + "\n" );
 			setUPReachableNodes();
 			//check reachable nodes around
 
@@ -109,9 +109,9 @@ public class ASternDerDeinenNamenTraegt {
 	private void checkNode(ANode node){
 		if(node.getPoint().equals(goal)){
 			node.setParent(currNode);
-			System.out.println("Removing from open list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
+			//System.out.println("Removing from open list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
 			openList.remove(node);
-			System.out.println("Adding to closed list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
+			//System.out.println("Adding to closed list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
 			closedList.add(node);
 			searching = false;
 		}else if (openList.contains(node)){
@@ -139,7 +139,7 @@ public class ASternDerDeinenNamenTraegt {
 		}
 
 		ANode temp = openList.get(lowestCostIndex);
-		System.out.println("Removing from open list X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
+		//System.out.println("Removing from open list X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
 
 		openList.remove(lowestCostIndex);
 
@@ -169,7 +169,7 @@ public class ASternDerDeinenNamenTraegt {
 		if(node !=null){
 			node.setParent(currNode);
 			node.setG_Value(currNode.getG_Value()+movementCost);
-			System.out.println("Adding to open list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
+			//System.out.println("Adding to open list X: " + node.getPoint().getX() + " Y: " + node.getPoint().getY() + "\n" );
 			openList.add(node);
 		}
 	}
@@ -194,13 +194,13 @@ public class ASternDerDeinenNamenTraegt {
 
 		ANode temp = goal;
 		Path path = new Path(goal.getPoint());
-		System.out.println("X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
+		//System.out.println("X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
 
 		//backtrack from start to finish via parent
 		//iterate backwards
 		while(temp.getParent()!=null){
 			temp = temp.getParent();
-			System.out.println("X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
+			//System.out.println("X: " + temp.getPoint().getX() + " Y: " + temp.getPoint().getY() + "\n" );
 			path.push(temp.getPoint());
 		}
 		return path;

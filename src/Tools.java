@@ -1,11 +1,8 @@
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.LinkedList;
 
@@ -31,33 +28,19 @@ public class Tools {
 	public static String logln(String msg) {
 
 		try {
-			
-			if(!logFile.exists()) {
+
+			if (!logFile.exists()) {
 				logFile.createNewFile();
 			}
-//			
-//			File temp = new File("temp");
-			
-			
-			
-			BufferedReader bfr = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)) );
-			
-			String str = "";
-			String line = "";
-			while((line = bfr.readLine()) != null) {
-				str += line + "\n";
-			}
-			
-			bfr.close();
-			
-			BufferedWriter bfw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile)) );
-			
-			bfw.write(str);
-			
+
+			BufferedWriter bfw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile,true)));
+
+			bfw.write(msg);
+			bfw.newLine();
+
 			bfw.close();
-			
+
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
