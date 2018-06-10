@@ -403,9 +403,12 @@ public class BotUtility {
 			e.printStackTrace();
 		}
 
+		int lightValue = 0;
+		
 		while (Motor.A.isMoving() && Motor.C.isMoving()) {
-
-			if (light.getLightValue() <= BotStatus.blackTile) {
+			lightValue = light.getLightValue();
+			System.out.println("Current light: "+lightValue);
+			if ( lightValue <= BotStatus.blackTile) {
 				System.out.println("Chasm found!");
 				LCD.drawString("Chasm detected!", 0, 1);
 				chasmFound = true;

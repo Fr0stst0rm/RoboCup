@@ -38,7 +38,7 @@ public class Main {
 
 	public Main() {
 
-		String version = "V 0.63";
+		String version = "V 0.65";
 
 		LCD.drawString(version, 0, 0);
 		System.out.println(version);
@@ -232,7 +232,7 @@ public class Main {
 
 		//---------------Pit-----------------
 
-		LCD.drawString("Calibrate low", 0, 1);
+		LCD.drawString("Calibrate dark", 0, 1);
 		Button.waitForAnyPress();
 
 		light.calibrateLow();
@@ -249,12 +249,12 @@ public class Main {
 
 		//------------Checkpoint--------------
 
-		LCD.drawString("Scann checkpoint", 0, 1);
-		Button.waitForAnyPress();
-
-		int checkpoint = light.getLightValue();
-
-		System.out.println("Ceckpoint: " + checkpoint);
+//		LCD.drawString("Scann checkpoint", 0, 1);
+//		Button.waitForAnyPress();
+//
+//		int checkpoint = light.getLightValue();
+//
+//		System.out.println("Ceckpoint: " + checkpoint);
 
 		//---------------Pit-----------------
 
@@ -265,8 +265,8 @@ public class Main {
 
 		System.out.println("Pit: " + pit);
 
-		BotStatus.blackTile = (pit + checkpoint) / 2;
-		BotStatus.pathTile = (path + checkpoint) / 2;
+		BotStatus.blackTile = (pit + path ) / 2;
+		BotStatus.pathTile = (path + pit) / 2;
 
 		System.out.println("Path >= " + BotStatus.pathTile);
 		System.out.println("Checkpoint > " + BotStatus.blackTile + " and < " + BotStatus.pathTile);
