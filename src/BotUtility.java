@@ -61,14 +61,32 @@ public class BotUtility {
 		}
 	}
 
-	public static void handleChasm(LightSensor lightsensor) {
-		BotStatus.mapping = false;
-		Motor.A.stop();
-		Motor.C.stop();
-		LCD.drawString("Chasm detected!", 0, 1);
-		while (lightsensor.getLightValue() <= BotStatus.blackTile) {
-			move(-0.1f);
+	public static void handleChasm() {
+		LightSensor lightsensor = new LightSensor(SensorPort.S2);
+		
+		lightsensor.setFloodlight(true);
+		
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		move(-3,false);
+		
+		while (lightsensor.getLightValue() <= BotStatus.blackTile) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		stop();
+		
+		lightsensor.setFloodlight(false);
 		moveHalfTileBackwards();
 		BotStatus.mapping = true;
 	}
@@ -123,8 +141,7 @@ public class BotUtility {
 		int rot = -500; // Degree
 		Motor.A.rotate(-(rot - 15), true);
 		Motor.C.rotate(rot + 15);
-		Motor.A.stop();
-		Motor.C.stop();
+		stop();
 
 		switch (BotStatus.currentDir) {
 		case NORTH:
@@ -163,8 +180,7 @@ public class BotUtility {
 		int rot = 500; // Degree
 		Motor.A.rotate(-(rot - 15), true);
 		Motor.C.rotate(rot + 15);
-		Motor.A.stop();
-		Motor.C.stop();
+		stop();
 
 		switch (BotStatus.currentDir) {
 		case NORTH:
@@ -201,6 +217,28 @@ public class BotUtility {
 	public static MapTile scanWalls() {
 
 		MapTile tile = new MapTile();
+
+		//Scan floor
+
+		LightSensor light = new LightSensor(SensorPort.S2);
+
+		light.setFloodlight(true);
+
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		int lightValue = light.getLightValue();
+
+		light.setFloodlight(false);
+
+		if ((lightValue > BotStatus.blackTile) && (lightValue < BotStatus.pathTile)) {
+			tile.isCheckPoint = true;
+		}
+
 		try {
 			int wallDistance = 25;
 
@@ -351,41 +389,86 @@ public class BotUtility {
 	}
 
 	public static void moveToNextTile() {
-		move(3);
-		switch (BotStatus.currentDir) {
-		case NORTH:
-			BotStatus.currentPos.y++;
-			break;
-		case EAST:
-			BotStatus.currentPos.x++;
-			break;
-		case WEST:
-			BotStatus.currentPos.x--;
-			break;
-		case SOUTH:
-			BotStatus.currentPos.y--;
-			break;
+		move(3, false);
+
+		boolean chasmFound = false;
+
+		LightSensor light = new LightSensor(SensorPort.S2);
+		light.setFloodlight(true);
+
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		BotStatus.pathToStart.push(new Point(BotStatus.currentPos));
+
+		while (Motor.A.isMoving() && Motor.C.isMoving()) {
+
+			if (light.getLightValue() <= BotStatus.blackTile) {
+				System.out.println("Chasm found!");
+				LCD.drawString("Chasm detected!", 0, 1);
+				chasmFound = true;
+				stop();
+			}
+
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		light.setFloodlight(false);
+
+		if (chasmFound) {
+			handleChasm();
+		} else {
+
+			switch (BotStatus.currentDir) {
+			case NORTH:
+				BotStatus.currentPos.y++;
+				break;
+			case EAST:
+				BotStatus.currentPos.x++;
+				break;
+			case WEST:
+				BotStatus.currentPos.x--;
+				break;
+			case SOUTH:
+				BotStatus.currentPos.y--;
+				break;
+			}
+			BotStatus.pathToStart.push(new Point(BotStatus.currentPos));
+		}
 	}
 
 	public static void moveHalfTileBackwards() {
 		move(-1.5f);
 	}
 
-	public static void move(float rotAmount) {//3 for one Tile, 1.5 for half tile
+	public static void move(float rotAmount) {
+		move(rotAmount, false);
+	}
+
+	public static void move(float rotAmount, boolean waitForMotor) {//3 for one Tile, 1.5 for half tile
 		float rotCorrection = rotAmount * 4;
 		try {
 			Motor.A.setSpeed(300);
 			Motor.C.setSpeed(300);
 			float rot = 373.5f * rotAmount; // 30 cm
 			Motor.A.rotate((int) (rot - rotCorrection), true); //Korrektur, weil motoren nicht gleich stark sind
-			Motor.C.rotate((int) rot);
+			Motor.C.rotate((int) rot, !waitForMotor);
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 			LCD.drawString(e.toString(), 0, 5);
 		}
-
+	}
+	
+	public static void stop() {
+		Motor.A.stop();
+		Motor.C.stop();
 	}
 
 }

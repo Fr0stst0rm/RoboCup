@@ -1,11 +1,15 @@
 
-
 public class MapTile {
 
 	public boolean wallNorth = false;
 	public boolean wallEast = false;
 	public boolean wallSouth = false;
 	public boolean wallWest = false;
+
+	public boolean victimNorth = false;
+	public boolean victimEast = false;
+	public boolean victimSouth = false;
+	public boolean victimWest = false;
 
 	public boolean isCheckPoint = false;
 	public boolean isStart = false;
@@ -27,7 +31,10 @@ public class MapTile {
 
 		String noWallHorizontal = "--";
 		String noWallVertical = "|";
-		
+
+		String wall = "#";
+		String victim = "V";
+
 		int size = 3;
 
 		if (!visited) {
@@ -36,7 +43,7 @@ public class MapTile {
 					if (isCorner(x, y, (size + 2))) {
 						str += "+";
 					} else {
-						if ((y == 0) || ( y == size+1)) {
+						if ((y == 0) || (y == size + 1)) {
 							str += "?";
 						} else {
 							str += "??";
@@ -54,11 +61,11 @@ public class MapTile {
 		if (isStart) {
 			filler = "St";
 		}
-		
+
 		if (isCheckPoint) {
 			filler = "CC";
 		}
-		
+
 		if (isChasm) {
 			filler = "66";
 		}
@@ -66,7 +73,11 @@ public class MapTile {
 		if (wallNorth) {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "##";
+				if (victimNorth) {
+					str += victim + "" + victim;
+				} else {
+					str += wall + "" + wall;
+				}
 			}
 			str += "+\n";
 		} else {
@@ -79,7 +90,11 @@ public class MapTile {
 
 		for (int y = 0; y < size; y++) {
 			if (wallWest) {
-				str += "#";
+				if (victimWest) {
+					str += victim;
+				} else {
+					str += wall;
+				}
 			} else {
 				str += noWallVertical;
 			}
@@ -89,7 +104,11 @@ public class MapTile {
 			}
 
 			if (wallEast) {
-				str += "#";
+				if (victimEast) {
+					str += victim;
+				} else {
+					str += wall;
+				}
 			} else {
 				str += noWallVertical;
 			}
@@ -99,7 +118,11 @@ public class MapTile {
 		if (wallSouth) {
 			str += "+";
 			for (int x = 0; x < size; x++) {
-				str += "##";
+				if (victimSouth) {
+					str += victim + "" + victim;
+				} else {
+					str += wall + "" + wall;
+				}
 			}
 			str += "+\n";
 		} else {
@@ -128,26 +151,26 @@ public class MapTile {
 		}
 		return false;
 	}
-	
+
 	public boolean isDeadEnd() {
 		int wallCount = 0;
-		
-		if(wallNorth) {
-			wallCount ++;
+
+		if (wallNorth) {
+			wallCount++;
 		}
-		
-		if(wallSouth) {
-			wallCount ++;
+
+		if (wallSouth) {
+			wallCount++;
 		}
-		
-		if(wallEast) {
-			wallCount ++;
+
+		if (wallEast) {
+			wallCount++;
 		}
-		
-		if(wallWest) {
-			wallCount ++;
+
+		if (wallWest) {
+			wallCount++;
 		}
-		
+
 		return (wallCount >= 3);
 	}
 
