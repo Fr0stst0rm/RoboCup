@@ -1,4 +1,5 @@
-
+import lejos.nxt.LightSensor;
+import lejos.nxt.SensorPort;
 
 public class BotStatus {
 	
@@ -6,7 +7,7 @@ public class BotStatus {
 	public static Direction lookDir = Direction.NORTH;
 	
 	public static int blackTile = 38;
-	public static int pathTile = 50;
+	//public static int pathTile = 50;
 	
 	public static int victimsFound = 0;
 	public static int victimsToFind = 20;
@@ -15,11 +16,13 @@ public class BotStatus {
 	
 	public static Map mazeMap = new Map();
 	
-	public static boolean mapping = true;
-	
 	public static Path pathToStart = new Path(0,0);
 	public static boolean mappingEnded = false;
 	
+	public static LightSensor light = new LightSensor(SensorPort.S2);
+	public static boolean chasmInterrupt = false;
+	public static boolean wallInterrupt = false;
+			
 	public static Direction convertRelativeDirection(RelativeDirection relDir) {
 		switch (relDir) {
 		case FORWARD:

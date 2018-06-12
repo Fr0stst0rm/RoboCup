@@ -1,13 +1,9 @@
 
 import lejos.nxt.LCD;
-import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
-import lejos.robotics.objectdetection.Feature;
-import lejos.robotics.objectdetection.FeatureDetector;
-import lejos.robotics.objectdetection.RangeFeatureDetector;
 
 public class BotUtility {
 
@@ -28,7 +24,7 @@ public class BotUtility {
 				break;
 			}
 			Motor.B.setSpeed(300);
-			int rot = 655; // Degree
+			int rot = 665; // Degree
 			Motor.B.rotate(rot);
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
@@ -53,7 +49,7 @@ public class BotUtility {
 				break;
 			}
 			Motor.B.setSpeed(300);
-			int rot = -655; // Degree
+			int rot = -665; // Degree
 			Motor.B.rotate(rot);
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
@@ -62,47 +58,69 @@ public class BotUtility {
 	}
 
 	public static void handleChasm() {
-		LightSensor lightsensor = new LightSensor(SensorPort.S2);
+		BotStatus.chasmInterrupt = true;
+		LCD.clear();
+		LCD.drawString("Handle chasm", 0, 0);
+		System.out.println("Handle chasm.");
 		
-		lightsensor.setFloodlight(true);
+		stop();
 		
 		try {
-			Thread.sleep(100);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		move(-3,false);
-		
-		while (lightsensor.getLightValue() <= BotStatus.blackTile) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		stop();
-		
-		lightsensor.setFloodlight(false);
 		moveHalfTileBackwards();
-		BotStatus.mapping = true;
+
+		Point nextPoint = new Point(BotStatus.currentPos);
+		switch (BotStatus.currentDir) {
+		case NORTH:
+			nextPoint.y++;
+			break;
+		case EAST:
+			nextPoint.x++;
+			break;
+		case WEST:
+			nextPoint.x--;
+			break;
+		case SOUTH:
+			nextPoint.y--;
+			break;
+		}
+
+		MapTile tile = new MapTile();
+		tile.isChasm = true;
+		tile.visited = true;
+		tile.wallNorth = true;
+		tile.wallEast = true;
+		tile.wallSouth = true;
+		tile.wallWest = true;
+		BotStatus.mazeMap.addTile(nextPoint, tile);
+
+		System.out.println("Chasm:");
+		System.out.println(tile);
+		
+		BotStatus.chasmInterrupt = false;
 	}
 
 	public static void handleVictim() {
 		System.out.println("Beeep!");
 		Sound.playTone(500, 5000);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static boolean scanForVictims() {
 
 		System.out.println("Scanning for victims...");
 
-		DThermalIR thermal;
-
-		thermal = new DThermalIR(SensorPort.S4);
+		DThermalIR thermal = new DThermalIR(SensorPort.S4);
 		//thermal.setEmissivity(0.53f);
 		//System.out.println(thermal.readEmissivity());
 		//Button.ENTER.waitForPressAndRelease();
@@ -114,6 +132,7 @@ public class BotUtility {
 			try {
 				obj = thermal.readObject();
 				amb = thermal.readAmbient();
+
 				System.out.println("ObjTemp = " + obj);
 				System.out.println("AmbTemp = " + amb);
 			} catch (Exception e) {
@@ -123,7 +142,7 @@ public class BotUtility {
 			}
 		} while ((obj == null) && (amb == null));
 
-		SensorPort.S4.i2cDisable();
+		//SensorPort.S4.i2cDisable();
 
 		if (obj > amb + 15) {
 			System.out.println("Victim found!");
@@ -217,27 +236,6 @@ public class BotUtility {
 	public static MapTile scanWalls() {
 
 		MapTile tile = new MapTile();
-
-		//Scan floor
-
-		LightSensor light = new LightSensor(SensorPort.S2);
-
-		light.setFloodlight(true);
-
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		int lightValue = light.getLightValue();
-
-		light.setFloodlight(false);
-
-		if ((lightValue > BotStatus.blackTile) && (lightValue < BotStatus.pathTile)) {
-			tile.isCheckPoint = true;
-		}
 
 		try {
 			int wallDistance = 25;
@@ -389,32 +387,40 @@ public class BotUtility {
 	}
 
 	public static void moveToNextTile() {
-		move(3, false);
 
 		boolean chasmFound = false;
 
-		LightSensor light = new LightSensor(SensorPort.S2);
-		light.setFloodlight(true);
-
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		Point nextPoint = new Point(BotStatus.currentPos);
+		switch (BotStatus.currentDir) {
+		case NORTH:
+			nextPoint.y++;
+			break;
+		case EAST:
+			nextPoint.x++;
+			break;
+		case WEST:
+			nextPoint.x--;
+			break;
+		case SOUTH:
+			nextPoint.y--;
+			break;
 		}
 
-		int lightValue = 0;
-		
-		while (Motor.A.isMoving() && Motor.C.isMoving()) {
-			lightValue = light.getLightValue();
-			System.out.println("Current light: "+lightValue);
-			if ( lightValue <= BotStatus.blackTile) {
-				System.out.println("Chasm found!");
-				LCD.drawString("Chasm detected!", 0, 1);
-				chasmFound = true;
-				stop();
-			}
+		move(3.1f);
 
+		boolean chasm = false;
+
+		while (BotStatus.chasmInterrupt) {
+			chasm = true;
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		while (BotStatus.wallInterrupt) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -423,55 +429,61 @@ public class BotUtility {
 			}
 		}
 
-		light.setFloodlight(false);
+		if (!chasm) {
 
-		if (chasmFound) {
-			handleChasm();
-		} else {
+			BotStatus.currentPos = nextPoint;
 
-			switch (BotStatus.currentDir) {
-			case NORTH:
-				BotStatus.currentPos.y++;
-				break;
-			case EAST:
-				BotStatus.currentPos.x++;
-				break;
-			case WEST:
-				BotStatus.currentPos.x--;
-				break;
-			case SOUTH:
-				BotStatus.currentPos.y--;
-				break;
-			}
-			BotStatus.pathToStart.push(new Point(BotStatus.currentPos));
+			BotStatus.pathToStart.push(new Point(nextPoint));
 		}
 	}
 
 	public static void moveHalfTileBackwards() {
-		move(-1.5f);
+		move(-1.4f); //TODO Anpassen
 	}
 
+	//	public static void move(float rotAmount) {
+	//		move(rotAmount, false);
+	//	}
+
+	//public static void move(float rotAmount, boolean waitForMotor) {//3 for one Tile, 1.5 for half tile
 	public static void move(float rotAmount) {
-		move(rotAmount, false);
-	}
-
-	public static void move(float rotAmount, boolean waitForMotor) {//3 for one Tile, 1.5 for half tile
-		float rotCorrection = rotAmount * 4;
+		float rotCorrection = rotAmount * 4.5f;
 		try {
 			Motor.A.setSpeed(300);
 			Motor.C.setSpeed(300);
-			float rot = 373.5f * rotAmount; // 30 cm
+			float rot = 364.0f * rotAmount; // 30 cm
 			Motor.A.rotate((int) (rot - rotCorrection), true); //Korrektur, weil motoren nicht gleich stark sind
-			Motor.C.rotate((int) rot, !waitForMotor);
+			Motor.C.rotate((int) rot);//, !waitForMotor);
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 			LCD.drawString(e.toString(), 0, 5);
 		}
 	}
-	
+
 	public static void stop() {
-		Motor.A.stop();
-		Motor.C.stop();
+		Motor.A.setSpeed(0);
+		Motor.C.setSpeed(0);
+	}
+
+	public static void resetToCenter() {
+
+		BotStatus.wallInterrupt = true;
+		LCD.clear();
+		LCD.drawString("Reset wall", 0, 0);
+		System.out.println("Reset wall.");
+		
+		stop();
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		move(-0.2f);
+		
+		BotStatus.wallInterrupt = false;
 	}
 
 }

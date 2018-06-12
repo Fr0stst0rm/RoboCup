@@ -17,7 +17,7 @@ import lejos.nxt.UltrasonicSensor;
 import lejos.robotics.objectdetection.RangeFeatureDetector;
 
 public class Main {
-	
+
 	File wav = new File("wall-e.wav");
 
 	public static void main(String[] args) {
@@ -26,35 +26,40 @@ public class Main {
 			Tools.logFile.delete();
 		}
 
-		//Zu wenig memory :(
 		System.setOut(new PrintStream(new SysLogStream()));
 		System.setErr(new PrintStream(new SysLogStream()));
 
 		//Simulation
 		//BaseMap.initBaseMap();
-		
+
 		new Main();
 	}
 
 	public Main() {
 
-		String version = "V 0.65";
-
+		String version = "V 0.91";
+				
 		LCD.drawString(version, 0, 0);
 		System.out.println(version);
 
 		Button.waitForAnyPress();
 
 		scanTileColors();
-
+		
 		//Dunkel = kleiner, Heller = größer
 		LCD.clear();
 		LCD.drawString("Black is <= " + BotStatus.blackTile, 0, 0);
 		//LCD.drawString("Checkpoint is < " + BotStatus.blackTile, 0, 1);
-		LCD.drawString("Path is >= " + BotStatus.pathTile, 0, 1);
+		//LCD.drawString("Path is >= " + BotStatus.pathTile, 0, 1);
 		LCD.drawString("Press button to\nstart ...", 0, 4);
 		Button.waitForAnyPress();
 
+		ChasmChecker cc = new ChasmChecker();
+		cc.start();
+		
+		WallReset wallR = new WallReset();
+		wallR.start();
+		
 		for (int i = 3; i >= 1; i--) {
 			LCD.clear();
 			LCD.drawString("" + i, 0, 0);
@@ -66,65 +71,151 @@ public class Main {
 			}
 		}
 
-		while (!BotStatus.mappingEnded) {
-			BotUtility.moveToNextTile();
+		MapTile tile = new MapTile();
+		tile.isStart = true;
+		tile.wallEast = true;
+		tile.wallSouth = true;
+		tile.wallWest = true;
+		tile.visited = true;
+
+		System.out.println("Adding tile to map");
+
+		BotStatus.mazeMap.addTile(0, 0, tile);
+
+		System.out.println(BotStatus.mazeMap.getMapTile(BotStatus.currentPos));
+
+		BotUtility.moveToNextTile();
+
+		RelativeDirection lastRelativeDirection = RelativeDirection.FORWARD;
+
+		while (!BotStatus.mappingEnded && (BotStatus.victimsFound < BotStatus.victimsToFind)) {
+
+			LCD.clear();
+
+			System.out.println("Scanning current tile:");
+
+			boolean scan = false;
+
+			try {
+				if (!BotStatus.mazeMap.getMapTile(BotStatus.currentPos).visited) {
+					scan = true;
+				} else {
+					scan = false;
+					System.out.println("Tile already scanned");
+				}
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
+				scan = true;
+			}
+
+			if (scan) {
+				try {
+					tile = BotUtility.scanWalls();
+				} catch (IllegalStateException e) {
+					System.out.println("Possible error 1");
+				}
+				System.out.println("Adding new tile");
+				try {
+					BotStatus.mazeMap.addTile(BotStatus.currentPos, tile);
+				} catch (IllegalStateException e) {
+					System.out.println("Possible error 2");
+				}
+				System.out.println("New tile added.");
+			}
+
+			System.out.println();
+			System.out.println("Current pos: " + BotStatus.currentPos);
+			System.out.println();
+			try {
+				System.out.println(BotStatus.mazeMap.getMapTile(BotStatus.currentPos));
+			} catch (IllegalStateException e) {
+				System.out.println("Possible error 3");
+			}
+			if (!BotStatus.mazeMap.hasUnvisitedNeighboring(BotStatus.currentPos)) {
+				handleDeadEnd();
+			} else {
+
+				System.out.println("No dead end");
+
+				boolean moved = false;
+				tile = BotStatus.mazeMap.getMapTile(BotStatus.currentPos);
+				Direction currentDir = BotStatus.convertRelativeDirection(lastRelativeDirection);
+				System.out.println("Current direction: " + BotStatus.currentDir);
+				do {
+					Direction nextDir = BotStatus.convertRelativeDirection(lastRelativeDirection);
+					System.out.println("Next direction: " + nextDir.name());
+
+					//Check if nextDir is a valid tile && not visited 
+					boolean tileIsValide = false;
+
+					if (!tile.checkWall(nextDir)) {
+						tileIsValide = true;
+						try {
+							tileIsValide = !BotStatus.mazeMap.getMapTile(BotStatus.currentPos, nextDir).visited;
+						} catch (IndexOutOfBoundsException | NullPointerException e) {
+							//e.printStackTrace();
+						}
+					}
+
+					System.out.println("Next tile valide: " + tileIsValide);
+
+					if (tileIsValide) {
+						LCD.drawString("Next dir: " + BotStatus.currentDir.name(), 0, 0); //turn if lastRelativeDirection is not forward
+						System.out.println("Turning bot " + lastRelativeDirection.name());
+						switch (lastRelativeDirection) {
+						case LEFT:
+							BotUtility.rotate90DegreesLeft();
+							break;
+						case RIGHT:
+							BotUtility.rotate90DegreesRight();
+							break;
+						case BACK:
+							BotUtility.rotate90DegreesRight();
+							BotUtility.rotate90DegreesRight();
+							break;
+						}
+
+						System.out.println("Moving forward");
+						BotUtility.moveToNextTile();
+						moved = true;
+					} else {
+						switch (lastRelativeDirection) {
+						case LEFT:
+							lastRelativeDirection = RelativeDirection.FORWARD;
+							break;
+						case RIGHT:
+							lastRelativeDirection = RelativeDirection.LEFT;
+							break;
+						case FORWARD:
+							lastRelativeDirection = RelativeDirection.RIGHT;
+							break;
+						}
+						if (currentDir.equals(BotStatus.convertRelativeDirection(lastRelativeDirection))) {
+							System.out.println("The bot should never reach this point ==> endless loop");
+							// handleDeadEnd();
+							moved = true;
+						}
+					}
+				} while (!moved);
+
+			}
 			if (Button.waitForAnyPress(450) == Button.ID_ESCAPE) {
 				BotStatus.mappingEnded = true;
 			}
 		}
 
-		/*
-		 * 
-		 * MapTile tile = new MapTile(); tile.isStart = true; tile.wallEast = true; tile.wallSouth = true; tile.wallWest = true; tile.visited = true;
-		 * 
-		 * System.out.println("Adding tile to map");
-		 * 
-		 * BotStatus.mazeMap.addTile(0, 0, tile);
-		 * 
-		 * System.out.println(BotStatus.mazeMap.getMapTile(BotStatus.currentPos));
-		 * 
-		 * BotUtility.moveToNextTile();
-		 * 
-		 * RelativeDirection lastRelativeDirection = RelativeDirection.FORWARD;
-		 * 
-		 * while (!BotStatus.mappingEnded && (BotStatus.victimsFound < BotStatus.victimsToFind)) {
-		 * 
-		 * LCD.clear();
-		 * 
-		 * System.out.println("Scanning current tile:");
-		 * 
-		 * boolean scan = false;
-		 * 
-		 * try { if (!BotStatus.mazeMap.getMapTile(BotStatus.currentPos).visited) { scan = true; System.out.println("Tile already scanned"); } } catch (IndexOutOfBoundsException | NullPointerException e) { scan = true; }
-		 * 
-		 * if (scan) { try { tile = BotUtility.scanWalls(); } catch (IllegalStateException e) { System.out.println("Possible error 1"); } System.out.println("Adding new tile"); try { BotStatus.mazeMap.addTile(BotStatus.currentPos, tile); } catch
-		 * (IllegalStateException e) { System.out.println("Possible error 2"); } System.out.println("New tile added."); }
-		 * 
-		 * System.out.println(); System.out.println("Current pos: " + BotStatus.currentPos); System.out.println(); try { System.out.println(BotStatus.mazeMap.getMapTile(BotStatus.currentPos)); } catch (IllegalStateException e) {
-		 * System.out.println("Possible error 3"); } if (!BotStatus.mazeMap.hasUnvisitedNeighboring(BotStatus.currentPos)) { handleDeadEnd(); } else {
-		 * 
-		 * System.out.println("No dead end");
-		 * 
-		 * boolean moved = false; tile = BotStatus.mazeMap.getMapTile(BotStatus.currentPos); Direction currentDir = BotStatus.convertRelativeDirection(lastRelativeDirection); System.out.println("Current direction: " + BotStatus.currentDir); do { Direction
-		 * nextDir = BotStatus.convertRelativeDirection(lastRelativeDirection); System.out.println("Next direction: " + nextDir.name());
-		 * 
-		 * //Check if nextDir is a valid tile && not visited boolean tileIsValide = false; if (!tile.checkWall(nextDir)) { tileIsValide = true; try { tileIsValide = !BotStatus.mazeMap.getMapTile(BotStatus.currentPos, nextDir).visited; } catch
-		 * (IndexOutOfBoundsException | NullPointerException e) { //e.printStackTrace(); } }
-		 * 
-		 * System.out.println("Next tile valide: " + tileIsValide);
-		 * 
-		 * if (tileIsValide) { LCD.drawString("Next dir: " + BotStatus.currentDir.name(), 0, 0); //turn if lastRelativeDirection is not forward System.out.println("Turning bot " + lastRelativeDirection.name()); switch (lastRelativeDirection) { case LEFT:
-		 * BotUtility.rotate90DegreesLeft(); break; case RIGHT: BotUtility.rotate90DegreesRight(); break; case BACK: BotUtility.rotate90DegreesRight(); BotUtility.rotate90DegreesRight(); break; }
-		 * 
-		 * System.out.println("Moving forward"); BotUtility.moveToNextTile(); moved = true; } else { switch (lastRelativeDirection) { case LEFT: lastRelativeDirection = RelativeDirection.FORWARD; break; case RIGHT: lastRelativeDirection =
-		 * RelativeDirection.LEFT; break; case FORWARD: lastRelativeDirection = RelativeDirection.RIGHT; break; } if (currentDir.equals(BotStatus.convertRelativeDirection(lastRelativeDirection))) {
-		 * System.out.println("The bot should never reach this point ==> endless loop"); // handleDeadEnd(); moved = true; } } } while (!moved);
-		 * 
-		 * } if(Button.waitForAnyPress(450) == Button.ID_ESCAPE) { BotStatus.mappingEnded = true; } }
-		 * 
-		 * Sound.playSample(wav,100);
-		 * System.out.println(BotStatus.mazeMap); Button.waitForAnyPress(); printMapToFile(BotStatus.mazeMap);
-		 */
+		cc.stop();
+		wallR.start();
+		
+		Sound.playSample(wav, 100);
+		System.out.println(BotStatus.mazeMap);
+
+		LCD.clear();
+		LCD.drawString("Bot finished!", 0, 0);
+		LCD.drawString("Victims found: " + BotStatus.victimsFound, 0, 1);
+		Button.waitForAnyPress();
+
+		printMapToFile(BotStatus.mazeMap);
+
 		Button.waitForAnyPress();
 
 	}
@@ -220,22 +311,21 @@ public class Main {
 
 	public void scanTileColors() {
 
-		LightSensor light = new LightSensor(SensorPort.S2);
-		light.setFloodlight(true);
+		BotStatus.light.setFloodlight(true);
 
 		//--------------Path----------------
 
 		LCD.drawString("Calibrate bright", 0, 0);
 		Button.waitForAnyPress();
 
-		light.calibrateHigh();
+		BotStatus.light.calibrateHigh();
 
 		//---------------Pit-----------------
 
 		LCD.drawString("Calibrate dark", 0, 1);
 		Button.waitForAnyPress();
 
-		light.calibrateLow();
+		BotStatus.light.calibrateLow();
 
 		LCD.clear();
 		//--------------Path----------------
@@ -243,36 +333,36 @@ public class Main {
 		LCD.drawString("Scann path", 0, 0);
 		Button.waitForAnyPress();
 
-		int path = light.getLightValue();
+		int path = BotStatus.light.getLightValue();
 
 		System.out.println("Path: " + path);
 
 		//------------Checkpoint--------------
 
-//		LCD.drawString("Scann checkpoint", 0, 1);
-//		Button.waitForAnyPress();
-//
-//		int checkpoint = light.getLightValue();
-//
-//		System.out.println("Ceckpoint: " + checkpoint);
+		//		LCD.drawString("Scann checkpoint", 0, 1);
+		//		Button.waitForAnyPress();
+		//
+		//		int checkpoint = BotStatus.light.getLightValue();
+		//
+		//		System.out.println("Ceckpoint: " + checkpoint);
 
 		//---------------Pit-----------------
 
 		LCD.drawString("Scann pit", 0, 2);
 		Button.waitForAnyPress();
 
-		int pit = light.getLightValue();
+		int pit = BotStatus.light.getLightValue();
 
 		System.out.println("Pit: " + pit);
 
-		BotStatus.blackTile = (pit + path ) / 2;
-		BotStatus.pathTile = (path + pit) / 2;
+		BotStatus.blackTile = (pit + path) / 2;
+		//BotStatus.pathTile = (path + pit) / 2;
 
-		System.out.println("Path >= " + BotStatus.pathTile);
-		System.out.println("Checkpoint > " + BotStatus.blackTile + " and < " + BotStatus.pathTile);
+		//System.out.println("Path >= " + BotStatus.pathTile);
+		//System.out.println("Checkpoint > " + BotStatus.blackTile + " and < " + BotStatus.pathTile);
 		System.out.println("Pit <= " + BotStatus.blackTile);
 
-		light.setFloodlight(false);
+		BotStatus.light.setFloodlight(false);
 
 		SensorPort.S2.i2cDisable();
 	}

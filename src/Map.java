@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class Map extends LinkedList<LinkedList<MapTile>> {
 
-	// zuert reihen = zeilen = line = y = horizointal = height, dann spalten = x = vertical = senkrecht =  width
+	// zuerst reihen = zeilen = line = y = horizointal = height, dann spalten = x = vertical = senkrecht =  width
 
 	Point startPoint = new Point(0, 0);
 
