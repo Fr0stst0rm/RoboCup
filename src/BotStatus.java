@@ -1,5 +1,7 @@
 import lejos.nxt.LightSensor;
+import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
+import lejos.robotics.navigation.DifferentialPilot;
 
 public class BotStatus {
 	
@@ -10,7 +12,7 @@ public class BotStatus {
 	//public static int pathTile = 50;
 	
 	public static int victimsFound = 0;
-	public static int victimsToFind = 20;
+	public static int victimsToFind = 5;
 	
 	public static Point currentPos = new Point(0,0);
 	
@@ -22,6 +24,9 @@ public class BotStatus {
 	public static LightSensor light = new LightSensor(SensorPort.S2);
 	public static boolean chasmInterrupt = false;
 	public static boolean wallInterrupt = false;
+	
+	public static DifferentialPilot pilot = new DifferentialPilot(3.5f, 11.0f, Motor.C, Motor.A);
+	public static boolean victimsInterrupt = false;
 			
 	public static Direction convertRelativeDirection(RelativeDirection relDir) {
 		switch (relDir) {

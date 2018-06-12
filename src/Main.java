@@ -6,15 +6,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.util.Arrays;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
-import lejos.nxt.LightSensor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
-import lejos.nxt.UltrasonicSensor;
-import lejos.robotics.objectdetection.RangeFeatureDetector;
 
 public class Main {
 
@@ -29,23 +25,54 @@ public class Main {
 		System.setOut(new PrintStream(new SysLogStream()));
 		System.setErr(new PrintStream(new SysLogStream()));
 
-		//Simulation
-		//BaseMap.initBaseMap();
-
 		new Main();
 	}
 
 	public Main() {
 
-		String version = "V 0.91";
-				
+		String version = "V 0.111";
+
 		LCD.drawString(version, 0, 0);
 		System.out.println(version);
 
 		Button.waitForAnyPress();
 
+//		for (int i = 3; i >= 1; i--) {
+//			LCD.clear();
+//			LCD.drawString("" + i, 0, 0);
+//
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		
+//		BotUtility.rotate90DegreesRight();
+//		BotUtility.rotate90DegreesRight();
+//		BotUtility.rotate90DegreesRight();
+//		BotUtility.rotate90DegreesRight();
+//
+//		Button.waitForAnyPress();
+//
+//		for (int i = 3; i >= 1; i--) {
+//			LCD.clear();
+//			LCD.drawString("" + i, 0, 0);
+//
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
+//		BotUtility.rotate90DegreesLeft();
+//		BotUtility.rotate90DegreesLeft();
+//		BotUtility.rotate90DegreesLeft();
+//		BotUtility.rotate90DegreesLeft();
+
 		scanTileColors();
-		
+
 		//Dunkel = kleiner, Heller = größer
 		LCD.clear();
 		LCD.drawString("Black is <= " + BotStatus.blackTile, 0, 0);
@@ -56,10 +83,10 @@ public class Main {
 
 		ChasmChecker cc = new ChasmChecker();
 		cc.start();
-		
+
 		WallReset wallR = new WallReset();
 		wallR.start();
-		
+
 		for (int i = 3; i >= 1; i--) {
 			LCD.clear();
 			LCD.drawString("" + i, 0, 0);
@@ -204,8 +231,8 @@ public class Main {
 		}
 
 		cc.stop();
-		wallR.start();
-		
+		wallR.stop();
+
 		Sound.playSample(wav, 100);
 		System.out.println(BotStatus.mazeMap);
 

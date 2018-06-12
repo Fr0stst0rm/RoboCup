@@ -7,6 +7,9 @@ import lejos.nxt.UltrasonicSensor;
 
 public class BotUtility {
 
+	public static final float TURN = 155;
+	public static final float rotateFix = 3;
+
 	public static void rotateSensor90DegreesRight() {
 		try {
 			switch (BotStatus.lookDir) {
@@ -24,7 +27,7 @@ public class BotUtility {
 				break;
 			}
 			Motor.B.setSpeed(300);
-			int rot = 665; // Degree
+			int rot = 668; // Degree
 			Motor.B.rotate(rot);
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
@@ -62,16 +65,16 @@ public class BotUtility {
 		LCD.clear();
 		LCD.drawString("Handle chasm", 0, 0);
 		System.out.println("Handle chasm.");
-		
+
 		stop();
-		
+
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		moveHalfTileBackwards();
 
 		Point nextPoint = new Point(BotStatus.currentPos);
@@ -101,7 +104,7 @@ public class BotUtility {
 
 		System.out.println("Chasm:");
 		System.out.println(tile);
-		
+
 		BotStatus.chasmInterrupt = false;
 	}
 
@@ -116,51 +119,9 @@ public class BotUtility {
 		}
 	}
 
-	public static boolean scanForVictims() {
-
-		System.out.println("Scanning for victims...");
-
-		DThermalIR thermal = new DThermalIR(SensorPort.S4);
-		//thermal.setEmissivity(0.53f);
-		//System.out.println(thermal.readEmissivity());
-		//Button.ENTER.waitForPressAndRelease();
-
-		Float obj = null;
-		Float amb = null;
-
-		do {
-			try {
-				obj = thermal.readObject();
-				amb = thermal.readAmbient();
-
-				System.out.println("ObjTemp = " + obj);
-				System.out.println("AmbTemp = " + amb);
-			} catch (Exception e) {
-				System.out.println("Exception while reading temp values!");
-				e.printStackTrace();
-				thermal = new DThermalIR(SensorPort.S4);
-			}
-		} while ((obj == null) && (amb == null));
-
-		//SensorPort.S4.i2cDisable();
-
-		if (obj > amb + 15) {
-			System.out.println("Victim found!");
-			BotStatus.victimsFound++;
-			return true;
-		}
-
-		return false;
-
-	}
-
 	public static void rotate90DegreesLeft() {
-		Motor.A.setSpeed(150);
-		Motor.C.setSpeed(150);
-		int rot = -500; // Degree
-		Motor.A.rotate(-(rot - 15), true);
-		Motor.C.rotate(rot + 15);
-		stop();
+		BotStatus.pilot.rotate(TURN);
+		BotStatus.pilot.stop();
 
 		switch (BotStatus.currentDir) {
 		case NORTH:
@@ -194,12 +155,8 @@ public class BotUtility {
 	}
 
 	public static void rotate90DegreesRight() {
-		Motor.A.setSpeed(150);
-		Motor.C.setSpeed(150);
-		int rot = 500; // Degree
-		Motor.A.rotate(-(rot - 15), true);
-		Motor.C.rotate(rot + 15);
-		stop();
+		BotStatus.pilot.rotate(-(TURN));
+		BotStatus.pilot.stop();
 
 		switch (BotStatus.currentDir) {
 		case NORTH:
@@ -244,6 +201,16 @@ public class BotUtility {
 
 			boolean next = true;
 
+			VictimChecker vc = new VictimChecker();
+			vc.start();
+
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 			do {
 				//Gerade
 				System.out.println("Scanning forward");
@@ -273,9 +240,7 @@ public class BotUtility {
 							tile.wallSouth = true;
 							break;
 						}
-						if (scanForVictims()) {
-							handleVictim();
-						}
+
 						next = true;
 					}
 
@@ -285,7 +250,19 @@ public class BotUtility {
 				}
 			} while (!next);
 
+			vc.stop();
+
 			//Rechts
+
+			vc = new VictimChecker();
+			vc.start();
+
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
 			rotateSensor90DegreesRight();
 			do {
@@ -315,9 +292,7 @@ public class BotUtility {
 							tile.wallWest = true;
 							break;
 						}
-						if (scanForVictims()) {
-							handleVictim();
-						}
+
 						next = true;
 
 					}
@@ -327,7 +302,13 @@ public class BotUtility {
 				}
 			} while (!next);
 
+			vc.stop();
+
 			//Links	
+
+			vc = new VictimChecker();
+			vc.start();
+
 			rotateSensor90DegreesLeft();
 			rotateSensor90DegreesLeft();
 
@@ -358,9 +339,7 @@ public class BotUtility {
 							tile.wallEast = true;
 							break;
 						}
-						if (scanForVictims()) {
-							handleVictim();
-						}
+
 						next = true;
 					}
 				} catch (IllegalStateException e) {
@@ -368,6 +347,8 @@ public class BotUtility {
 					next = false;
 				}
 			} while (!next);
+
+			vc.stop();
 
 			rotateSensor90DegreesRight();
 
@@ -383,6 +364,7 @@ public class BotUtility {
 		IllegalStateException e) {
 			System.out.println("Possibel error 4");
 		}
+
 		return tile;
 	}
 
@@ -419,8 +401,17 @@ public class BotUtility {
 				e.printStackTrace();
 			}
 		}
-		
+
 		while (BotStatus.wallInterrupt) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		while (BotStatus.victimsInterrupt) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -438,7 +429,7 @@ public class BotUtility {
 	}
 
 	public static void moveHalfTileBackwards() {
-		move(-1.4f); //TODO Anpassen
+		move(-1.45f); //TODO Anpassen
 	}
 
 	//	public static void move(float rotAmount) {
@@ -471,18 +462,18 @@ public class BotUtility {
 		LCD.clear();
 		LCD.drawString("Reset wall", 0, 0);
 		System.out.println("Reset wall.");
-		
+
 		stop();
-		
+
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		move(-0.2f);
-		
+
 		BotStatus.wallInterrupt = false;
 	}
 

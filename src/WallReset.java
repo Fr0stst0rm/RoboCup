@@ -21,8 +21,10 @@ public class WallReset implements Runnable {
 	
 	@Override
 	public void run() {
-
+		
 		TouchSensor touch = new TouchSensor(SensorPort.S3);
+		
+		System.out.println("Touch started.");
 
 		try {
 			Thread.sleep(100);
