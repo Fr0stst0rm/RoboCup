@@ -37,39 +37,39 @@ public class Main {
 
 		Button.waitForAnyPress();
 
-//		for (int i = 3; i >= 1; i--) {
-//			LCD.clear();
-//			LCD.drawString("" + i, 0, 0);
-//
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		
-//		BotUtility.rotate90DegreesRight();
-//		BotUtility.rotate90DegreesRight();
-//		BotUtility.rotate90DegreesRight();
-//		BotUtility.rotate90DegreesRight();
-//
-//		Button.waitForAnyPress();
-//
-//		for (int i = 3; i >= 1; i--) {
-//			LCD.clear();
-//			LCD.drawString("" + i, 0, 0);
-//
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//
-//		BotUtility.rotate90DegreesLeft();
-//		BotUtility.rotate90DegreesLeft();
-//		BotUtility.rotate90DegreesLeft();
-//		BotUtility.rotate90DegreesLeft();
+		//		for (int i = 3; i >= 1; i--) {
+		//			LCD.clear();
+		//			LCD.drawString("" + i, 0, 0);
+		//
+		//			try {
+		//				Thread.sleep(1000);
+		//			} catch (InterruptedException e) {
+		//				e.printStackTrace();
+		//			}
+		//		}
+		//		
+		//		BotUtility.rotate90DegreesRight();
+		//		BotUtility.rotate90DegreesRight();
+		//		BotUtility.rotate90DegreesRight();
+		//		BotUtility.rotate90DegreesRight();
+		//
+		//		Button.waitForAnyPress();
+		//
+		//		for (int i = 3; i >= 1; i--) {
+		//			LCD.clear();
+		//			LCD.drawString("" + i, 0, 0);
+		//
+		//			try {
+		//				Thread.sleep(1000);
+		//			} catch (InterruptedException e) {
+		//				e.printStackTrace();
+		//			}
+		//		}
+		//
+		//		BotUtility.rotate90DegreesLeft();
+		//		BotUtility.rotate90DegreesLeft();
+		//		BotUtility.rotate90DegreesLeft();
+		//		BotUtility.rotate90DegreesLeft();
 
 		scanTileColors();
 
@@ -99,6 +99,9 @@ public class Main {
 		}
 
 		MapTile tile = new MapTile();
+
+		//tile = BotUtility.scanWalls();
+
 		tile.isStart = true;
 		tile.wallEast = true;
 		tile.wallSouth = true;
@@ -157,7 +160,7 @@ public class Main {
 			} catch (IllegalStateException e) {
 				System.out.println("Possible error 3");
 			}
-			if (!BotStatus.mazeMap.hasUnvisitedNeighboring(BotStatus.currentPos)) {
+			if (!BotStatus.mazeMap.hasUnvisitedNeighboring(BotStatus.currentPos) || (BotStatus.victimsFound >= BotStatus.victimsToFind)) {
 				handleDeadEnd();
 			} else {
 
@@ -234,11 +237,11 @@ public class Main {
 		wallR.stop();
 
 		Sound.playSample(wav, 100);
-		System.out.println(BotStatus.mazeMap);
 
 		LCD.clear();
 		LCD.drawString("Bot finished!", 0, 0);
 		LCD.drawString("Victims found: " + BotStatus.victimsFound, 0, 1);
+		System.out.println("Victims found: " + BotStatus.victimsFound);
 		Button.waitForAnyPress();
 
 		printMapToFile(BotStatus.mazeMap);
@@ -258,8 +261,9 @@ public class Main {
 			stop = BotStatus.pathToStart.pop();
 		} while (!BotStatus.pathToStart.empty() && !BotStatus.mazeMap.hasUnvisitedNeighboring(stop));
 
-		if (stop.equals(new Point(0, 0))) {
-			System.out.println("Maze completely mapped!");
+		if (stop.equals(new Point(0, 0)) || (BotStatus.victimsFound >= BotStatus.victimsToFind)) {
+			stop = new Point(0, 0);
+			System.out.println("Bot ending!");
 			System.out.println("Returning to start tile.");
 			BotStatus.mappingEnded = true;
 		}
